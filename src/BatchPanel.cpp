@@ -1,14 +1,20 @@
 #include "../include/BatchPanel.h"
 
-BatchPanel::BatchPanel(WINDOW *parent, int nlines, int ncols, int begin_x, int begin_y)
-        : Panel(parent, "Lote actual", nlines, ncols, begin_x, begin_y) {
+BatchPanel::BatchPanel(
+        WINDOW *parent,
+        std::string title,
+        int nlines, int ncols,
+        int begin_x, int begin_y)
 
-
+        : Panel(parent, title, nlines, ncols, begin_x, begin_y) {
 }
 
-void BatchPanel::post() {
-    Panel::post();
-    mvwprintw(subwin, 0, 0, "%-4s %-4s", "ID", "TME");
+void BatchPanel::setPrintRowFunc(PrintRowFunc func) {
+    print_row_func = func;
+}
+
+void BatchPanel::setHeader(string &str) {
+    header = str;
 }
 
 void BatchPanel::display(Batch *batch) {
@@ -21,8 +27,13 @@ void BatchPanel::display(Batch *batch) {
     wmove(subwin, row, 0);
     wclrtobot(subwin); // clear data
 
-    for (it = batch->begin(); it != batch->end(); it++, row ++) {
-        process = *it;
-        mvwprintw(subwin, row, 0, "%-4d %-4d", process->program_number, process->estimated_time);
+    for (it = batch->begin(); it != batch->end(); it++, row++) {
+        wmove(subwin, row, 0);
+        print_row_func(subwin, *it);
     }
+}
+
+void BatchPanel::post() {
+    Panel::post();
+    mvwprintw(subwin, 0, 0, header.c_str());
 }

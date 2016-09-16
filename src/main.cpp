@@ -20,10 +20,14 @@ void execute();
 
 WINDOW *content_win;
 deque<Batch *> pending_batches;
+Batch finished_processes;
 
 // info panels
-BatchPanel   *batch_panel;
+BatchPanel   *batch_panel, *finished_panel;
 ProcessPanel *process_panel;
+
+void printProcess(WINDOW *win, Process *process);
+void printFinishedProcess(WINDOW *win, Process *process);
 
 int main(void) {
     int num_of_processes;
@@ -35,9 +39,13 @@ int main(void) {
 
     content_win = subwin(stdscr, LINES - 4, COLS - 4, 3, 2);
 
+    // set panels
     process_panel  = new ProcessPanel(content_win, 10, 25, 4, 15);
-    batch_panel    = new BatchPanel(content_win, 10, 15, 4, 0);
-    // finished_panel = new BatchPanel(content_win, 10, 36, 4, 40);
+    batch_panel    = new BatchPanel(content_win, "Lote actual", 10, 15, 4, 0);
+    finished_panel = new BatchPanel(content_win, "Terminados", 10, 36, 4, 40);
+
+    batch_panel->setPrintRowFunc(&printProcess);
+    finished_panel->setPrintRowFunc(&printFinishedProcess);
 
     // set main window
     box(stdscr, 0, 0);
@@ -54,25 +62,23 @@ int main(void) {
 
     batch_panel->post();
     process_panel->post();
+    finished_panel->post();
 
     setTotalTimeCounter(0);
     setBatchesLeftCounter(pending_batches.size());
 
     execute();
+
     getch();
 
     delete(process_panel);
     delete(batch_panel);
-    // delete(finished_panel);
+    delete(finished_panel);
     delwin(content_win);
-    
+
     endwin();
 
     return 0;
-}
-
-void initPanels() {
-
 }
 
 /**
@@ -147,12 +153,20 @@ void execute() {
     total_time = 0;
 
     while (!pending_batches.empty()) {
+        // get first batch
         batch = pending_batches.front();
+        pending_batches.pop_front();
+
+        // update batchers counter
+        setBatchesLeftCounter(pending_batches.size());
 
         while (!batch->empty()) {
-            batch_panel->display(batch);
-
+            // get first process
             process = batch->front();
+            batch->pop_front();
+
+            // display information
+            batch_panel->display(batch);
             process_panel->display(process);
 
             time(&last_time);
@@ -173,12 +187,11 @@ void execute() {
             }
 
             process->run();
+            finished_processes.push_back(process);
 
-            batch->pop_front();
-            delete(process);
+            finished_panel->display(&finished_processes);
+            doupdate();
         }
-
-        pending_batches.pop_front();
     }
 }
 
@@ -190,4 +203,20 @@ void setBatchesLeftCounter(unsigned int num_of_batches) {
 void setTotalTimeCounter(unsigned int total_time) {
     mvwprintw(content_win, 2, 0, "Tiempo transcurrido: %lu", total_time);
     wnoutrefresh(content_win);
+}
+
+void printProcess(WINDOW *win, Process *process) {
+    wprintw(win, "%-4lu | %-4lu", process->program_number, process->estimated_time);
+}
+
+void printFinishedProcess(WINDOW *win, Process *process) {
+    wprintw(
+        win,
+        "%-4d | %-4d %c %-4d | %-4d",
+        process->program_number,
+        process->left_operand,
+        process->operation,
+        process->right_operand,
+        process->result
+    );
 }
