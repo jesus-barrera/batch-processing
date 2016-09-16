@@ -11,7 +11,7 @@ public:
     BatchPanel(WINDOW *parent, std::string title, int nlines, int ncols, int begin_x, int begin_y);
 
     void setPrintRowFunc(PrintRowFunc func);
-    void setHeader(string &str);
+    void setHeader(string str);
     void display(Batch *data);
     void post();
 

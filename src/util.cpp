@@ -18,3 +18,13 @@ void clearLine(WINDOW *win, int line, bool has_border) {
         wclrtoeol(win);
     }
 }
+
+std::string& trim(std::string &str) {
+    std::size_t index;
+
+    index = str.find_last_not_of(" ");
+
+    str.erase(index + 1);
+
+    return str;
+}

@@ -1,3 +1,4 @@
+#include <cstdarg>
 #include "../include/ProcessPanel.h"
 
 const std::string ProcessPanel::labels[] = {
@@ -18,36 +19,17 @@ void ProcessPanel::post() {
 }
 
 void ProcessPanel::display(Process *process) {
-    setName(process->name);
+    setProgrammerName(process->programmer_name);
     setProgramNumber(process->program_number);
     setOperation(process->operation, process->left_operand, process->right_operand);
     setEstimatedTime(process->estimated_time);
     setElapsedTime(process->elapsed_time);
 }
 
-void ProcessPanel::setProgramNumber(unsigned int program_number) {
-    clearField(PROGRAM_NUMBER_FIELD);
-    wprintw(subwin, "%lu", program_number);
-}
-
-void ProcessPanel::setName(std::string &name) {
-    clearField(NAME_FIELD);
-    wprintw(subwin, "%s", name.c_str());
-}
-
-void ProcessPanel::setOperation(char operation, int left_operand, int right_operand) {
-    clearField(OPERATION_FIELD);
-    wprintw(subwin, "%d %c %d", left_operand, operation, right_operand);
-}
-
-void ProcessPanel::setEstimatedTime(unsigned int estimated_time) {
-    clearField(ESTIMATED_TIME_FIELD);
-    wprintw(subwin, "%lu", estimated_time);
-}
-
-void ProcessPanel::setElapsedTime(unsigned int elapsed_time) {
-    clearField(ELAPSED_TIME_FIELD);
-    wprintw(subwin, "%lu", elapsed_time);
+void ProcessPanel::clear() {
+    for (int i = 0; i < NUM_OF_FIELDS; i++) {
+        clearField(i);
+    }
 }
 
 void ProcessPanel::clearField(int index) {
@@ -55,8 +37,39 @@ void ProcessPanel::clearField(int index) {
     wclrtoeol(subwin);
 }
 
+void ProcessPanel::setProgramNumber(unsigned int program_number) {
+    setField(PROGRAM_NUMBER_FIELD, "%lu", program_number);
+}
+
+void ProcessPanel::setProgrammerName(std::string &name) {
+    setField(PROGRAMMER_NAME_FIELD, "%s", name.c_str());
+}
+
+void ProcessPanel::setOperation(short operation, int left_operand, int right_operand) {
+    setField(OPERATION_FIELD, "%d %s %d", left_operand, Process::operators[operation], right_operand);
+}
+
+void ProcessPanel::setEstimatedTime(unsigned int estimated_time) {
+    setField(ESTIMATED_TIME_FIELD, "%lu", estimated_time);
+}
+
+void ProcessPanel::setElapsedTime(unsigned int elapsed_time) {
+    setField(ELAPSED_TIME_FIELD, "%lu", elapsed_time);
+}
+
 void ProcessPanel::printLabels() {
     for (int i = 0; i < NUM_OF_FIELDS; i++) {
         mvwprintw(subwin, i, 0, labels[i].c_str());
     }
+}
+
+void ProcessPanel::setField(int field_index, const char *format, ...) {
+    va_list params;
+
+    va_start(params, format);
+
+    clearField(field_index);
+    vwprintw(subwin, format, params);
+
+    va_end(params);
 }

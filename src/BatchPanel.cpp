@@ -13,21 +13,24 @@ void BatchPanel::setPrintRowFunc(PrintRowFunc func) {
     print_row_func = func;
 }
 
-void BatchPanel::setHeader(string &str) {
+void BatchPanel::setHeader(string str) {
     header = str;
 }
 
 void BatchPanel::display(Batch *batch) {
     Batch::iterator it;
     Process *process;
-    int row;
+    int row, count;
 
     row = 1; // skip title row
+    count = 1;
 
     wmove(subwin, row, 0);
     wclrtobot(subwin); // clear data
 
-    for (it = batch->begin(); it != batch->end(); it++, row++) {
+    for (it = batch->begin(); it != batch->end(); it++, row++, count++) {
+        if ((count % PROCESSES_PER_BATCH) == 1) row++;
+
         wmove(subwin, row, 0);
         print_row_func(subwin, *it);
     }

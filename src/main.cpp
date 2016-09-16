@@ -7,16 +7,18 @@
 #include "../include/ProcessForm.h"
 #include "../include/ProcessPanel.h"
 #include "../include/BatchPanel.h"
+#include "../include/field_types.h"
 #include "../include/util.h"
 
 using namespace std;
 
-void initPanels();
 void captureProcesses(int num_of_processes);
 void setBatchesLeftCounter(unsigned int batches_left);
 void setTotalTimeCounter(unsigned int batches_left);
 void execute();
 
+void printProcess(WINDOW *win, Process *process);
+void printFinishedProcess(WINDOW *win, Process *process);
 
 WINDOW *content_win;
 deque<Batch *> pending_batches;
@@ -26,26 +28,28 @@ Batch finished_processes;
 BatchPanel   *batch_panel, *finished_panel;
 ProcessPanel *process_panel;
 
-void printProcess(WINDOW *win, Process *process);
-void printFinishedProcess(WINDOW *win, Process *process);
-
 int main(void) {
     int num_of_processes;
 
     // Initialize ncurses
     initscr();
     cbreak();
-    keypad(stdscr, TRUE);
 
+    // create subwindow for contet
     content_win = subwin(stdscr, LINES - 4, COLS - 4, 3, 2);
+    keypad(content_win, TRUE);
 
-    // set panels
+    initFieldTypes();
+
+    // set up
     process_panel  = new ProcessPanel(content_win, 10, 25, 4, 15);
     batch_panel    = new BatchPanel(content_win, "Lote actual", 10, 15, 4, 0);
-    finished_panel = new BatchPanel(content_win, "Terminados", 10, 36, 4, 40);
+    finished_panel = new BatchPanel(content_win, "Terminados", 16, 36, 4, 40);
 
     batch_panel->setPrintRowFunc(&printProcess);
+    batch_panel->setHeader("ID   | TE  ");
     finished_panel->setPrintRowFunc(&printFinishedProcess);
+    finished_panel->setHeader("ID   | Operacion    | Resultado");
 
     // set main window
     box(stdscr, 0, 0);
@@ -64,26 +68,27 @@ int main(void) {
     process_panel->post();
     finished_panel->post();
 
-    setTotalTimeCounter(0);
+    setTotalTimeCounter(total_time);
     setBatchesLeftCounter(pending_batches.size());
 
     execute();
 
     getch();
 
+    // free memory
     delete(process_panel);
     delete(batch_panel);
     delete(finished_panel);
     delwin(content_win);
 
+    // TODO: delete processes stored in finished_processes
+
+    endFieldTypes();
     endwin();
 
     return 0;
 }
 
-/**
- * shows the process
- */
 void captureProcesses(int num_of_processes) {
     WINDOW *form_win;
     int key;
@@ -104,6 +109,7 @@ void captureProcesses(int num_of_processes) {
         mvwprintw(content_win, 0, 0, "Procesos capturados: %d/%d", captured_processes, num_of_processes);
         wnoutrefresh(content_win);
 
+        form->goToField(0); // set focus on first field
         form->setCursor();
 
         do {
@@ -115,12 +121,13 @@ void captureProcesses(int num_of_processes) {
         // create process
         process = new Process();
 
-        process->program_number = form->getProgramNumber();
-        process->name           = form->getName();
-        process->operation      = form->getOperation();
-        process->left_operand   = form->getLeftOperand();
-        process->right_operand  = form->getRightOperand();
-        process->estimated_time = form->getEstimatedTime();
+        process->program_number  = form->getProgramNumber();
+        process->programmer_name = form->getProgrammerName();
+        process->operation       = form->getOperation();
+        process->left_operand    = form->getLeftOperand();
+        process->right_operand   = form->getRightOperand();
+        process->estimated_time  = form->getEstimatedTime();
+
 
         if (++captured_processes % PROCESSES_PER_BATCH == 1) {
             batch = new Batch();
@@ -129,10 +136,12 @@ void captureProcesses(int num_of_processes) {
 
         batch->push_back(process);
 
+        form->program_numbers.push_back(process->program_number);
+
         form->clear();
     }
 
-    clearLine(content_win, 0);
+    clearLine(content_win, 0); // remove captured processes counter
     form->unpost();
 
     wnoutrefresh(content_win);
@@ -193,6 +202,11 @@ void execute() {
             doupdate();
         }
     }
+
+    process_panel->clear();
+    setBatchesLeftCounter(0);
+
+    doupdate();
 }
 
 void setBatchesLeftCounter(unsigned int num_of_batches) {
@@ -212,10 +226,10 @@ void printProcess(WINDOW *win, Process *process) {
 void printFinishedProcess(WINDOW *win, Process *process) {
     wprintw(
         win,
-        "%-4d | %-4d %c %-4d | %-4d",
+        "%-4d | %-4d %-2s %-4d | %-4d",
         process->program_number,
         process->left_operand,
-        process->operation,
+        Process::operators[process->operation],
         process->right_operand,
         process->result
     );

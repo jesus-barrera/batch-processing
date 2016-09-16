@@ -8,7 +8,7 @@ class ProcessPanel: public Panel {
 public:
     enum {
         PROGRAM_NUMBER_FIELD,
-        NAME_FIELD,
+        PROGRAMMER_NAME_FIELD,
         OPERATION_FIELD,
         ESTIMATED_TIME_FIELD,
         ELAPSED_TIME_FIELD,
@@ -21,15 +21,19 @@ public:
 
     void post();
     void display(Process *process);
+    void clear();
+    void clearField(int index);
+
     void setProgramNumber(unsigned int program_number);
-    void setName(std::string &name);
-    void setOperation(char operation, int left_operand, int right_operand);
+    void setProgrammerName(std::string &name);
+    void setOperation(short int operation, int left_operand, int right_operand);
     void setEstimatedTime(unsigned int estimated_time);
     void setElapsedTime(unsigned int elapsed_time);
 
+
 private:
-    void clearField(int index);
     void printLabels();
+    void setField(int field_index, const char *format, ...);
 };
 
 #endif
