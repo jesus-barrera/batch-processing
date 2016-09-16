@@ -11,7 +11,7 @@ This is a tool for visualizing how batch processing works.
 From the project root:
 ```
 # compile source
-g++ src/*.cpp -lncurses -o bin/<executable_file>
+g++ src/*.cpp -lncurses -lform -o bin/<executable_file>
 
 # run the generated file
 bin/<executable_file>
