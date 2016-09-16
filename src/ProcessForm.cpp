@@ -1,31 +1,40 @@
 #include <limits>
-#include <ncurses.h>
 #include <cstdlib>
+
+#include <ncurses.h>
+
 #include "../include/ProcessForm.h"
 
 const std::string ProcessForm::labels[] = {
     "No. Programa: ",
     "Nombre: ",
-    "Operacion (+, -, *, /, %): ",
+    "Operacion (+, -, *, /, %, ^, %%%%): ",
     "Operando Izq.: ",
     "Operando Der.: ",
     "Tiempo estimado: ",
 };
 
-const char *ProcessForm::valid_operations[] = {"+", "-", "*", "/", "%", NULL};
+const char *ProcessForm::valid_operations[] = {"+", "-", "*", "/", "%", "^", "%%", NULL};
 
 const int ProcessForm::FIELDS_Y_OFFSET = 2;
 
-ProcessForm::ProcessForm(int start_y, int start_x) {
-    this->start_y = start_y;
-    this->start_x = start_x;
+ProcessForm::ProcessForm(WINDOW *win) {
+    window = win;
+    int x, y;
 
-    for (int i = 0; i < NUM_OF_FIELDS; i++, start_y += FIELDS_Y_OFFSET) {
-        fields[i] = new_field(1, 10, start_y, start_x + labels[i].length(), 0, 0);
+    x = 0;
+    y = 0;
+
+    // create fields
+    for (int i = 0; i < NUM_OF_FIELDS; i++, y += FIELDS_Y_OFFSET) {
+        fields[i] = new_field(1, 10, y, x + labels[i].length(), 0, 0);
         set_field_back(fields[i], A_UNDERLINE);
         field_opts_off(fields[i], O_AUTOSKIP | O_NULLOK);
     }
 
+    fields[NUM_OF_FIELDS] = NULL;
+
+    // set field types
     set_field_type(fields[PROGRAM_NUMBER_FIELD], TYPE_INTEGER, 1, 0, std::numeric_limits<int>::max());
     set_field_type(fields[NAME_FIELD], TYPE_ALNUM, 1);
     set_field_type(fields[OPERATION_FIELD], TYPE_ENUM, valid_operations, 0, 0);
@@ -33,22 +42,27 @@ ProcessForm::ProcessForm(int start_y, int start_x) {
     set_field_type(fields[RIGHT_OPERAND_FIELD], TYPE_INTEGER, 1, 0, 0);
     set_field_type(fields[ESTIMATED_TIME_FIELD], TYPE_INTEGER, 1, 1, std::numeric_limits<int>::max());
 
-    fields[NUM_OF_FIELDS] = NULL;
-
     form = new_form(fields);
 
-    post_form(form);
-    printLabels();
+    set_form_sub(form, window);
 }
 
 ProcessForm::~ProcessForm() {
-    unpost_form(form);
     free_form(form);
 
     for (int i = 0; i < NUM_OF_FIELDS; i++) {
         free_field(fields[i]);
         fields[i] = NULL;
     }
+}
+
+void ProcessForm::post() {
+    post_form(form);
+    printLabels();
+}
+
+void ProcessForm::unpost() {
+    unpost_form(form);
 }
 
 void ProcessForm::handleKey(int key) {
@@ -73,14 +87,13 @@ void ProcessForm::handleKey(int key) {
     }
 }
 
-void ProcessForm::goToFirstField() {
-    form_driver(form, REQ_FIRST_FIELD);
+void ProcessForm::setCursor() {
+    pos_form_cursor(form);
 }
 
 void ProcessForm::clear() {
     for (int i = 0; i < NUM_OF_FIELDS; i++) {
         set_current_field(form, fields[i]);
-        set_field_status(fields[i], FALSE);
         form_driver(form, REQ_CLR_FIELD);
     }
 }
@@ -124,12 +137,16 @@ int ProcessForm::getEstimatedTime() {
 void ProcessForm::printLabels() {
     int x, y;
 
-    y = start_y;
-    x = start_x;
+    y = 0;
+    x = 0;
+
+    wattron(window, A_BOLD);
 
     for (int i = 0; i < NUM_OF_FIELDS; i++, y += FIELDS_Y_OFFSET) {
-        mvprintw(y, x, labels[i].c_str());
+        mvwprintw(window, y, x, labels[i].c_str());
     }
+
+    wattroff(window, A_BOLD);
 }
 
 bool ProcessForm::isZeroDivision() {

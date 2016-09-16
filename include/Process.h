@@ -1,3 +1,6 @@
+#ifndef _PROCESS_INCLUDED_
+#define _PROCESS_INCLUDED_
+
 #include <string>
 
 using namespace std;
@@ -15,3 +18,5 @@ public:
 
     int run();
 };
+
+#endif

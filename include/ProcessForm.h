@@ -1,3 +1,6 @@
+#ifndef _PROCESS_FORM_INCLUDED_
+#define _PROCESS_FORM_INCLUDED_
+
 #include <string>
 #include <form.h>
 
@@ -20,12 +23,13 @@ public:
     static const string labels[];
     static const char *valid_operations[];
 
-    ProcessForm(int start_y = 0, int start_x = 0);
+    ProcessForm(WINDOW *window = NULL);
     ~ProcessForm();
 
     void post();
+    void unpost();
     void handleKey(int key);
-    void goToFirstField();
+    void setCursor();
     void clear();
     bool validate();
 
@@ -37,11 +41,12 @@ public:
     int getEstimatedTime();
 
 private:
+    WINDOW *window;
     FORM *form;
     FIELD *fields[NUM_OF_FIELDS + 1];
-
-    int start_x, start_y;
 
     void printLabels();
     bool isZeroDivision();
 };
+
+#endif
