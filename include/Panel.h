@@ -11,13 +11,15 @@ public:
 
     Panel(WINDOW *parent, std::string title,  int nlines, int ncols, int begin_x, int begin_y);
     ~Panel();
+
     void post();
+    void unpost();
 
 private:
-    WINDOW *win;
+    WINDOW *outer_win;
 
 protected:
-    WINDOW *subwin;
+    WINDOW *inner_win;
     std::string title;
 };
 

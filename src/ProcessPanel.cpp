@@ -18,6 +18,9 @@ void ProcessPanel::post() {
     printLabels();
 }
 
+/**
+ * Fills the fields with the process data.
+ */
 void ProcessPanel::display(Process *process) {
     setProgrammerName(process->programmer_name);
     setProgramNumber(process->program_number);
@@ -26,16 +29,25 @@ void ProcessPanel::display(Process *process) {
     setElapsedTime(process->elapsed_time);
 }
 
+/**
+ * Clears all fields. The labels are left.
+ */
 void ProcessPanel::clear() {
     for (int i = 0; i < NUM_OF_FIELDS; i++) {
         clearField(i);
     }
 }
 
+/**
+ * Clears a field's value leaving the label. The pointer is left at the begining
+ * of the field, this is, inmediatly after the field's label.
+ */
 void ProcessPanel::clearField(int index) {
-    wmove(subwin, index, labels[index].size());
-    wclrtoeol(subwin);
+    wmove(inner_win, index, labels[index].size());
+    wclrtoeol(inner_win);
 }
+
+/* *** The following methods are used to set a field's value. *** */
 
 void ProcessPanel::setProgramNumber(unsigned int program_number) {
     setField(PROGRAM_NUMBER_FIELD, "%lu", program_number);
@@ -57,19 +69,31 @@ void ProcessPanel::setElapsedTime(unsigned int elapsed_time) {
     setField(ELAPSED_TIME_FIELD, "%lu", elapsed_time);
 }
 
+/**
+ * Sets the labels in place, one per row.
+ */
 void ProcessPanel::printLabels() {
+    wattron(inner_win, A_DIM);
+
     for (int i = 0; i < NUM_OF_FIELDS; i++) {
-        mvwprintw(subwin, i, 0, labels[i].c_str());
+        mvwprintw(inner_win, i, 0, labels[i].c_str());
     }
+
+    wattroff(inner_win, A_DIM);
 }
 
+/**
+ * Sets the value of a field by it's index. The previous value is first removed
+ * before the new value is written. A string format describes how the value is
+ * printed.
+ */
 void ProcessPanel::setField(int field_index, const char *format, ...) {
     va_list params;
 
     va_start(params, format);
 
     clearField(field_index);
-    vwprintw(subwin, format, params);
+    vwprintw(inner_win, format, params);
 
     va_end(params);
 }

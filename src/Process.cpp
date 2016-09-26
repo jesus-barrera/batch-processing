@@ -1,7 +1,11 @@
 #include <cmath>
 #include <cstring>
+#include <sstream>
 
 #include "../include/Process.h"
+#include "../include/util.h"
+
+using namespace std;
 
 const char *Process::operators[NUM_OF_OPS + 1] = {
     "+", "-", "*", "/", "%", "^", "%%", NULL
@@ -17,6 +21,36 @@ short Process::getOperation(const char *operator_str) {
     return -1;
 }
 
+Process *Process::newRandom() {
+    static unsigned int count = 0;
+    stringstream name;
+    Process *process;
+    int right_operand_minvalue;
+
+    process = new Process();
+
+    process->program_number = ++count;
+
+    // Generate operation and operands
+    process->operation = random(0, NUM_OF_OPS - 1);
+    process->left_operand = random(0, 100);
+    right_operand_minvalue = (process->operation == DIV_OP ||
+                              process->operation == MOD_OP);
+    process->right_operand = random(right_operand_minvalue, 100);
+
+    // Generate programmer's name
+    name << "Programa " << process->program_number;
+    process->programmer_name = name.str();
+
+    process->estimated_time = random(3, 15);
+
+    return process;
+}
+
+unsigned int Process::getTimeLeft() {
+    return estimated_time - elapsed_time;
+}
+
 int Process::run() {
     switch (operation) {
         case ADD_OP:
@@ -29,6 +63,10 @@ int Process::run() {
 
         case DIV_OP:
             result = left_operand / right_operand;
+            break;
+
+        case MOD_OP:
+            result = left_operand % right_operand;
             break;
 
         case MUL_OP:

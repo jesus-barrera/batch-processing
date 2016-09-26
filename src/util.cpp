@@ -1,9 +1,10 @@
+#include <cstdlib>
 #include "../include/util.h"
 
 void printCentered(WINDOW *win, std::string text, int row, int attrs) {
-    attron(attrs);
-    mvwprintw(win, row, (getmaxx(win) - text.size()) / 2, text.c_str());
-    attroff(attrs);
+    wattron(win, attrs);
+    mvwaddstr(win, row, (getmaxx(win) - text.size()) / 2, text.c_str());
+    wattroff(win, attrs);
 }
 
 void clearLine(WINDOW *win, int line, bool has_border) {
@@ -27,4 +28,8 @@ std::string& trim(std::string &str) {
     str.erase(index + 1);
 
     return str;
+}
+
+int random(unsigned int min, unsigned int max) {
+    return (rand() % (max - min + 1) + min);
 }

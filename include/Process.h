@@ -18,18 +18,27 @@ public:
         NUM_OF_OPS
     };
 
+    enum {
+        SUCCESS,
+        ERROR
+    };
+
     static const char *operators[];
 
+    short status;
     string programmer_name;
     short operation;
     int left_operand;
     int right_operand;
     int result;
+    unsigned int program_number;
     unsigned int estimated_time;
     unsigned int elapsed_time;
-    unsigned int program_number;
 
     static short getOperation(const char* operator_str);
+    static Process *newRandom();
+
+    unsigned int getTimeLeft();
     int run();
 };
 

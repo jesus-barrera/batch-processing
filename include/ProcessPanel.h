@@ -30,7 +30,6 @@ public:
     void setEstimatedTime(unsigned int estimated_time);
     void setElapsedTime(unsigned int elapsed_time);
 
-
 private:
     void printLabels();
     void setField(int field_index, const char *format, ...);
