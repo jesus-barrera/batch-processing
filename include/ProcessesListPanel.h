@@ -7,6 +7,7 @@
 class ProcessesListPanel: public Panel {
 public:
     ProcessesListPanel(WINDOW *parent, std::string title, int nlines, int ncols, int begin_x, int begin_y);
+    virtual ~ProcessesListPanel();
 
     void post();
     void setProcesses(Batch *data);

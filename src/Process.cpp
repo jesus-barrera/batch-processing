@@ -31,18 +31,22 @@ Process *Process::newRandom() {
 
     process->program_number = ++count;
 
-    // Generate operation and operands
-    process->operation = random(0, NUM_OF_OPS - 1);
-    process->left_operand = random(0, 100);
-    right_operand_minvalue = (process->operation == DIV_OP ||
-                              process->operation == MOD_OP);
-    process->right_operand = random(right_operand_minvalue, 100);
-
-    // Generate programmer's name
+    // generate programmer's name
     name << "Programa " << process->program_number;
     process->programmer_name = name.str();
 
+    // set operation and operands
+    process->operation     = random(1, NUM_OF_OPS) - 1;
+    process->left_operand  = random(0, 100);
+    right_operand_minvalue = (process->operation == DIV_OP ||
+                              process->operation == MOD_OP);
+
+    process->right_operand = random(right_operand_minvalue, 100);
+
+    // set other data
     process->estimated_time = random(3, 15);
+    process->elapsed_time = 0;
+    process->state = Process::READY;
 
     return process;
 }

@@ -20,7 +20,7 @@ FinishedProcessesPanel::FinishedProcessesPanel(
 }
 
 void FinishedProcessesPanel::printProcess(Process *process) {
-    if (process->status == Process::SUCCESS) {
+    if (process->state == Process::TERMINATED) {
         wprintw(
             inner_win,
             "%-2d | %-4d %-2s %-4d = %-4d",
@@ -31,6 +31,6 @@ void FinishedProcessesPanel::printProcess(Process *process) {
             process->result
         );
     } else {
-        wprintw(inner_win, "%-2d | %s", process->program_number, "ERROR");
+        wprintw(inner_win, "%-2d | %s", process->program_number, "ERROR!");
     }
 }

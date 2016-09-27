@@ -19,19 +19,22 @@ public:
     };
 
     enum {
-        SUCCESS,
+        READY,
+        RUNNING,
+        TERMINATED,
+        INTERRUPTED,
         ERROR
     };
 
     static const char *operators[];
 
-    short status;
+    short state;
+    unsigned int program_number;
     string programmer_name;
     short operation;
     int left_operand;
     int right_operand;
     int result;
-    unsigned int program_number;
     unsigned int estimated_time;
     unsigned int elapsed_time;
 

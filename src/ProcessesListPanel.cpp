@@ -11,6 +11,8 @@ ProcessesListPanel::ProcessesListPanel(
         scrollok(inner_win, TRUE);
 }
 
+ProcessesListPanel::~ProcessesListPanel() { }
+
 void ProcessesListPanel::post() {
     int max_x;
 
@@ -29,22 +31,22 @@ void ProcessesListPanel::post() {
  * Displays a list of processes in the table.
  */
 void ProcessesListPanel::setProcesses(Batch *batch) {
-    int row;
-    int count;
-
-    row = 1; // skip column header row
-
-    // clear previous data
-    wmove(inner_win, row, 0);
+    // clear previous data, skip column header row
+    wmove(inner_win, 1, 0);
     wclrtobot(inner_win);
 
-    count = 0;
+    if (batch != NULL) {
+        unsigned int count = 0;
 
-    while (count < batch->size()) {
-        wmove(inner_win, row, 0);
-        printProcess(batch->at(count++));
+        while (count < batch->size()) {
+            printProcess(batch->at(count++));
 
-        // add extra space at the end of the batch
-        row += ((count % PROCESSES_PER_BATCH) == 0) ? 2 : 1;
+            if (count != batch->size()) {
+                waddch(inner_win, '\n');
+
+                // add extra space at the end of the batch
+                if ((count % PROCESSES_PER_BATCH) == 0) waddch(inner_win, '\n');
+            }
+        }
     }
 }

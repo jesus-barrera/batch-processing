@@ -6,7 +6,7 @@ const std::string ProcessPanel::labels[] = {
     "Nombre: ",
     "Operacion: ",
     "TE: ",
-    "TT: "
+    "TR: "
 };
 
 ProcessPanel::ProcessPanel(WINDOW *parent, int nlines, int ncols, int begin_x, int begin_y)
@@ -22,11 +22,15 @@ void ProcessPanel::post() {
  * Fills the fields with the process data.
  */
 void ProcessPanel::display(Process *process) {
-    setProgrammerName(process->programmer_name);
-    setProgramNumber(process->program_number);
-    setOperation(process->operation, process->left_operand, process->right_operand);
-    setEstimatedTime(process->estimated_time);
-    setElapsedTime(process->elapsed_time);
+    if (process != NULL) {
+        setProgrammerName(process->programmer_name);
+        setProgramNumber(process->program_number);
+        setOperation(process->operation, process->left_operand, process->right_operand);
+        setEstimatedTime(process->estimated_time);
+        setTimeLeft(process->getTimeLeft());
+    } else {
+        clear();
+    }
 }
 
 /**
@@ -65,8 +69,8 @@ void ProcessPanel::setEstimatedTime(unsigned int estimated_time) {
     setField(ESTIMATED_TIME_FIELD, "%lu", estimated_time);
 }
 
-void ProcessPanel::setElapsedTime(unsigned int elapsed_time) {
-    setField(ELAPSED_TIME_FIELD, "%lu", elapsed_time);
+void ProcessPanel::setTimeLeft(unsigned int time_left) {
+    setField(TIME_LEFT_FIELD, "%lu", time_left);
 }
 
 /**

@@ -13,7 +13,7 @@ BatchProcessesPanel::BatchProcessesPanel(
     std::stringstream heading;
 
     // set column heading
-    heading << setw(2) << "ID" << " | "
+    heading << setw(4) << "ID" << " | "
             << setw(2) << "TE" << " | "
             << setw(2) << "TR";
 
@@ -21,9 +21,19 @@ BatchProcessesPanel::BatchProcessesPanel(
 }
 
 void BatchProcessesPanel::printProcess(Process *process) {
+    char *format;
+
+    if (process->state == Process::RUNNING) {
+        format = (char *)"> %-2lu | %-2lu | %-2lu";
+    } else if (process->elapsed_time > 0){
+        format = (char *)"* %-2lu | %-2lu | %-2lu";
+    } else {
+        format = (char *)"  %-2lu | %-2lu | %-2lu";
+    }
+
     wprintw(
         inner_win,
-        "%-2lu | %-2lu | %-2lu",
+        format,
         process->program_number,
         process->estimated_time,
         process->getTimeLeft()
