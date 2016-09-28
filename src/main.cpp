@@ -68,7 +68,7 @@ int main(void) {
     process_panel->post();
     finished_panel->post();
 
-    setTotalTimeCounter(total_time);
+    setTotalTimeCounter(0);
     setBatchesLeftCounter(pending_batches.size());
 
     execute();
