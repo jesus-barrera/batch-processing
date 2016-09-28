@@ -36,12 +36,17 @@ Process *Process::newRandom() {
     process->programmer_name = name.str();
 
     // set operation and operands
-    process->operation     = random(1, NUM_OF_OPS) - 1;
-    process->left_operand  = random(0, 100);
-    right_operand_minvalue = (process->operation == DIV_OP ||
-                              process->operation == MOD_OP);
+    process->operation = random(1, NUM_OF_OPS) - 1;
 
-    process->right_operand = random(right_operand_minvalue, 100);
+    if (process->operation == POW_OP) {
+        process->left_operand = random(0, 9);
+        process->right_operand = random(0, 9);
+    } else {
+        process->left_operand  = random(0, 100);
+        right_operand_minvalue = (process->operation == DIV_OP ||
+                                  process->operation == MOD_OP);
+        process->right_operand = random(right_operand_minvalue, 100);
+    }
 
     // set other data
     process->estimated_time = random(3, 15);

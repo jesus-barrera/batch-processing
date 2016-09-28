@@ -31,6 +31,14 @@ void FinishedProcessesPanel::printProcess(Process *process) {
             process->result
         );
     } else {
-        wprintw(inner_win, "%-2d | %s", process->program_number, "ERROR!");
+        wprintw(
+            inner_win,
+            "%-2d | %-4d %-2s %-4d = %-4s",
+            process->program_number,
+            process->left_operand,
+            Process::operators[process->operation],
+            process->right_operand,
+            "ERROR!"
+        );
     }
 }
