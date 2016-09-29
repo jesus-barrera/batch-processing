@@ -6,6 +6,7 @@ const std::string ProcessPanel::labels[] = {
     "Nombre: ",
     "Operacion: ",
     "TE: ",
+    "TT: ",
     "TR: "
 };
 
@@ -27,6 +28,7 @@ void ProcessPanel::display(Process *process) {
         setProgramNumber(process->program_number);
         setOperation(process->operation, process->left_operand, process->right_operand);
         setEstimatedTime(process->estimated_time);
+        setElapsedTime(process->elapsed_time);
         setTimeLeft(process->getTimeLeft());
     } else {
         clear();
@@ -67,6 +69,10 @@ void ProcessPanel::setOperation(short operation, int left_operand, int right_ope
 
 void ProcessPanel::setEstimatedTime(unsigned int estimated_time) {
     setField(ESTIMATED_TIME_FIELD, "%lu", estimated_time);
+}
+
+void ProcessPanel::setElapsedTime(unsigned int elapsed_time) {
+    setField(ELAPSED_TIME_FIELD, "%lu", elapsed_time);
 }
 
 void ProcessPanel::setTimeLeft(unsigned int time_left) {

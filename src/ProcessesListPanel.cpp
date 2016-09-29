@@ -13,14 +13,18 @@ ProcessesListPanel::ProcessesListPanel(
 
 ProcessesListPanel::~ProcessesListPanel() { }
 
-void ProcessesListPanel::post() {
+void ProcessesListPanel::setColumnsHeading(std::string heading) {
     int max_x;
-
-    Panel::post();
 
     // fill heading with spaces.
     max_x = getmaxx(inner_win);
-    columns_heading.append(max_x - columns_heading.size(), ' ');
+    heading.append(max_x - heading.size(), ' ');
+
+    columns_heading = heading;
+}
+
+void ProcessesListPanel::post() {
+    Panel::post();
 
     wattron(inner_win, A_REVERSE);
     mvwaddstr(inner_win, 0, 0, columns_heading.c_str());
@@ -31,22 +35,26 @@ void ProcessesListPanel::post() {
  * Displays a list of processes in the table.
  */
 void ProcessesListPanel::setProcesses(Batch *batch) {
-    // clear previous data, skip column header row
+    unsigned int count;
+
+    // clear previous data, skip column heading row
     wmove(inner_win, 1, 0);
     wclrtobot(inner_win);
 
-    if (batch != NULL) {
-        unsigned int count = 0;
+    if (batch == NULL) return;
 
-        while (count < batch->size()) {
-            printProcess(batch->at(count++));
+    count = 0;
 
-            if (count != batch->size()) {
-                waddch(inner_win, '\n');
+    while (count < batch->size()) {
+        printProcess(batch->at(count++));
 
-                // add extra space at the end of the batch
-                if ((count % PROCESSES_PER_BATCH) == 0) waddch(inner_win, '\n');
-            }
+        if (count != batch->size()) {
+            /* use a line feed instead of moving the cursor one row down. This
+               causes the screen to scroll up when reaching the last row */
+            waddch(inner_win, '\n');
+
+            // add an extra blank line at the end of the batch
+            if ((count % PROCESSES_PER_BATCH) == 0) waddch(inner_win, '\n');
         }
     }
 }

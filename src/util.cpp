@@ -17,6 +17,9 @@ std::string& trim(std::string &str) {
     return str;
 }
 
+/**
+ * Generates a random number between min and max inclusive.
+ */
 int random(unsigned int min, unsigned int max) {
     return (rand() % (max - min + 1) + min);
 }

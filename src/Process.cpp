@@ -11,6 +11,9 @@ const char *Process::operators[NUM_OF_OPS + 1] = {
     "+", "-", "*", "/", "%", "^", "%%", NULL
 };
 
+/**
+ * Gets the operation value for a given operator.
+ */
 short Process::getOperation(const char *operator_str) {
     for (int op = 0; op < NUM_OF_OPS; op++) {
         if (strcmp(operators[op], operator_str) == 0) {
@@ -21,6 +24,9 @@ short Process::getOperation(const char *operator_str) {
     return -1;
 }
 
+/**
+ * Allocates a new Process object an fills it with random values.
+ */
 Process *Process::newRandom() {
     static unsigned int count = 0;
     stringstream name;
@@ -60,6 +66,10 @@ unsigned int Process::getTimeLeft() {
     return estimated_time - elapsed_time;
 }
 
+/**
+ * Performs the operation described by the process' operation and operands. The
+ * result is stored in the result attribute and returned.
+ */
 int Process::run() {
     switch (operation) {
         case ADD_OP:

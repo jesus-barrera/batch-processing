@@ -17,7 +17,7 @@ BatchProcessesPanel::BatchProcessesPanel(
             << setw(2) << "TE" << " | "
             << setw(2) << "TR";
 
-    columns_heading = heading.str();
+    setColumnsHeading(heading.str());
 }
 
 void BatchProcessesPanel::printProcess(Process *process) {

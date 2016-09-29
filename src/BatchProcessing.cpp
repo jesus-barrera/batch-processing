@@ -39,7 +39,7 @@ BatchProcessing::~BatchProcessing() {
 void BatchProcessing::post() {
     curs_set(0);
     noecho();
-    
+
     // show counters
     total_time_counter->post();
     total_time_counter->setValue(0);
@@ -209,16 +209,17 @@ void BatchProcessing::pause() {
 
 /**
  * Updates all timers showing in screen: the global timer, the current
- * process time left shown in the process panel and in the batch panel.
+ * process elapsed time and time left.
  */
 void BatchProcessing::updateTimers() {
     total_time_counter->setValue(timer.getTime());
     process_panel->setTimeLeft(current_process->getTimeLeft());
+    process_panel->setElapsedTime(current_process->elapsed_time);
     batch_panel->setProcesses(current_batch); // TODO: update only the current process row
 }
 
 /**
- * Updates the panels with the current data.
+ * Updates panels with the current data.
  */
 void BatchProcessing::updatePanels() {
     process_panel->display(current_process);

@@ -16,7 +16,7 @@ FinishedProcessesPanel::FinishedProcessesPanel(
     heading << setw(2) << "ID" << " | "
             << " Operacion";
 
-    columns_heading = heading.str();
+    setColumnsHeading(heading.str());
 }
 
 void FinishedProcessesPanel::printProcess(Process *process) {

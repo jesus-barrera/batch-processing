@@ -13,9 +13,11 @@ public:
     void setProcesses(Batch *data);
 
 protected:
-    std::string columns_heading;
-
+    void setColumnsHeading(std::string heading);
     virtual void printProcess(Process *process) = 0;
+
+private:
+    std::string columns_heading;
 };
 
 #endif
