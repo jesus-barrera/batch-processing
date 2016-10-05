@@ -20,7 +20,7 @@ FinishedProcessesPanel::FinishedProcessesPanel(
 }
 
 void FinishedProcessesPanel::printProcess(Process *process) {
-    if (process->state == Process::TERMINATED) {
+    if (process->termination_status == Process::SUCCESS) {
         wprintw(
             inner_win,
             "%-2d | %-4d %-2s %-4d = %-4d",

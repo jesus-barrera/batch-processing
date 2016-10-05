@@ -1,39 +1,29 @@
 #include <sstream>
 #include <iomanip>
 
-#include "../include/BatchProcessesPanel.h"
+#include "../include/ReadyProcessesPanel.h"
 
-BatchProcessesPanel::BatchProcessesPanel(
+ReadyProcessesPanel::ReadyProcessesPanel(
     WINDOW *parent,
     int nlines, int ncols,
     int begin_x, int begin_y)
 
-    : ProcessesListPanel(parent, "Lote actual", nlines, ncols, begin_x, begin_y) {
+    : ProcessesListPanel(parent, "Procesos Listos", nlines, ncols, begin_x, begin_y) {
 
     std::stringstream heading;
 
     // set column heading
-    heading << setw(4) << "ID" << " | "
+    heading << setw(2) << "ID" << " | "
             << setw(2) << "TE" << " | "
             << setw(2) << "TR";
 
     setColumnsHeading(heading.str());
 }
 
-void BatchProcessesPanel::printProcess(Process *process) {
-    char *format;
-
-    if (process->state == Process::RUNNING) {
-        format = (char *)"> %-2lu | %-2lu | %-2lu";
-    } else if (process->elapsed_time > 0){
-        format = (char *)"* %-2lu | %-2lu | %-2lu";
-    } else {
-        format = (char *)"  %-2lu | %-2lu | %-2lu";
-    }
-
+void ReadyProcessesPanel::printProcess(Process *process) {
     wprintw(
         inner_win,
-        format,
+        "%-2lu | %-2lu | %-2lu",
         process->program_number,
         process->estimated_time,
         process->getTimeLeft()

@@ -28,7 +28,7 @@ void ProcessPanel::display(Process *process) {
         setProgramNumber(process->program_number);
         setOperation(process->operation, process->left_operand, process->right_operand);
         setEstimatedTime(process->estimated_time);
-        setElapsedTime(process->elapsed_time);
+        setElapsedTime(process->service_time);
         setTimeLeft(process->getTimeLeft());
     } else {
         clear();

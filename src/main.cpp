@@ -2,14 +2,14 @@
 #include <ctime>
 
 #include "../include/screen.h"
-#include "../include/BatchProcessing.h"
+#include "../include/ProcessScheduler.h"
 #include "../include/util.h"
 
 void initialize();
 void finalize();
 
 WINDOW *screen;
-BatchProcessing *batch_processing;
+ProcessScheduler *scheduler;
 
 int main(void) {
     int num_of_processes;
@@ -20,15 +20,15 @@ int main(void) {
     wprintw(screen, "Numero de procesos: ");
     wscanw(screen, "%d", &num_of_processes);
 
-    batch_processing->generateProcesses(num_of_processes);
-    batch_processing->post();
+    scheduler->generateProcesses(num_of_processes);
+    scheduler->post();
 
-    batch_processing->setMessage("Presiona una tecla para comenzar...");
+    scheduler->setMessage("Presiona una tecla para comenzar...");
     wgetch(screen);
 
-    batch_processing->runSimulation();
+    scheduler->runSimulation();
 
-    batch_processing->setMessage("Presiona una tecla para salir...");
+    scheduler->setMessage("Presiona una tecla para salir...");
     wgetch(screen);
 
     finalize();
@@ -52,7 +52,7 @@ void initialize() {
     screen = derwin(stdscr, SCREEN_LINES, SCREEN_COLS, 3, 1);
     keypad(screen, TRUE);
 
-    batch_processing = new BatchProcessing();
+    scheduler = new ProcessScheduler();
 }
 
 void finalize() {

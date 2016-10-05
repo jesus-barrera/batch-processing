@@ -34,27 +34,22 @@ void ProcessesListPanel::post() {
 /**
  * Displays a list of processes in the table.
  */
-void ProcessesListPanel::setProcesses(Batch *batch) {
+void ProcessesListPanel::setProcesses(ProcessList &list) {
     unsigned int count;
 
     // clear previous data, skip column heading row
     wmove(inner_win, 1, 0);
     wclrtobot(inner_win);
 
-    if (batch == NULL) return;
-
     count = 0;
 
-    while (count < batch->size()) {
-        printProcess(batch->at(count++));
+    while (count < list.size()) {
+        printProcess(list.at(count++));
 
-        if (count != batch->size()) {
+        if (count != list.size()) {
             /* use a line feed instead of moving the cursor one row down. This
                causes the screen to scroll up when reaching the last row */
             waddch(inner_win, '\n');
-
-            // add an extra blank line at the end of the batch
-            if ((count % PROCESSES_PER_BATCH) == 0) waddch(inner_win, '\n');
         }
     }
 }

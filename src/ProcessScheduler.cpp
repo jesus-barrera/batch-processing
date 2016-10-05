@@ -1,28 +1,30 @@
 #include <sstream>
 
-#include "../include/BatchProcessing.h"
+#include "../include/ProcessScheduler.h"
 #include "../include/screen.h"
 
-BatchProcessing::BatchProcessing() {
+ProcessScheduler::ProcessScheduler() {
     // counters
-    batches_left_counter = new Field<unsigned int>(screen, "Lotes pendientes: ", 0, 0);
-    total_time_counter   = new Field<unsigned int>(screen, "Tiempo total: ", 1, 0);
+    new_processes_counter = new Field<unsigned int>(screen, "Procesos nuevos: ", 0, 0);
+    total_time_counter = new Field<unsigned int>(screen, "Tiempo total: ", 1, 0);
 
     // place panels
-    batch_panel = new BatchProcessesPanel(screen, 10, 17, 3, 0);
-    process_panel = new ProcessPanel(screen, 10, 25, 3, 17);
-    finished_panel = new FinishedProcessesPanel(screen, 17, 35, 3, 42);
+    ready_panel = new ReadyProcessesPanel(screen, 8, 17, 2, 0);
+    blocked_panel = new BlockedProcessesPanel(screen, 8, 17, 2, 17);
+    process_panel = new ProcessPanel(screen, 8, 34, 10, 0);
+    finished_panel = new FinishedProcessesPanel(screen, 17, 35, 2, 42);
 
-    help_win = derwin(screen, 7, 40, 13, 0);
+    help_win = derwin(screen, 2, 40, 18, 0);
     syncok(help_win, TRUE);
 }
 
-BatchProcessing::~BatchProcessing() {
-    delete(batches_left_counter);
+ProcessScheduler::~ProcessScheduler() {
+    delete(new_processes_counter);
     delete(total_time_counter);
 
+    delete(ready_panel);
+    delete(blocked_panel);
     delete(process_panel);
-    delete(batch_panel);
     delete(finished_panel);
 
     delwin(help_win);
@@ -36,19 +38,20 @@ BatchProcessing::~BatchProcessing() {
 /**
  * Writes all elements to screen.
  */
-void BatchProcessing::post() {
+void ProcessScheduler::post() {
     curs_set(0);
     noecho();
 
     // show counters
+    new_processes_counter->post();
+    new_processes_counter->setValue(new_processes.size());
+
     total_time_counter->post();
     total_time_counter->setValue(0);
 
-    batches_left_counter->post();
-    batches_left_counter->setValue(pending_batches.size());
-
     // show panels
-    batch_panel->post();
+    ready_panel->post();
+    blocked_panel->post();
     process_panel->post();
     finished_panel->post();
 }
@@ -56,133 +59,172 @@ void BatchProcessing::post() {
 /**
  * Prints a message in the help window. Previous content is erased.
  */
-void BatchProcessing::setMessage(std::string message) {
+void ProcessScheduler::setMessage(std::string message) {
     werase(help_win);
     mvwaddstr(help_win, 0, 0, message.c_str());
 }
 
 /**
- * Generates a given number of processes randomly. All processes are stored and
- * grouped in batches.
+ * Generates a given number of processes randomly. All processes are stored in
+ * the new processes list.
  */
-void BatchProcessing::generateProcesses(int num_of_processes) {
-    Batch *batch;
-    Process *process;
-    int count;
-
-    count = 0;
-
-    while (count < num_of_processes) {
-        process = Process::newRandom();
-
-        if (++count % PROCESSES_PER_BATCH == 1) {
-            batch = new Batch();
-            pending_batches.push_back(batch);
-        }
-
-        batch->push_back(process);
+void ProcessScheduler::generateProcesses(int num_of_processes) {
+    for (int count = 0; count < num_of_processes; count++) {
+        new_processes.push_back(Process::newRandom());
     }
 }
 
 /**
  * Run all the processes.
  */
-void BatchProcessing::runSimulation() {
+void ProcessScheduler::runSimulation() {
+    unsigned int new_time;
+    unsigned int old_time;
+    unsigned int num_of_processes;
+
     nodelay(screen, TRUE);
 
     printHelp();
+
+    num_of_processes = new_processes.size();
+
     timer.start();
+    new_time = 0;
 
-    while (!pending_batches.empty()) {
-        nextBatch();
-        batches_left_counter->setValue(pending_batches.size());
+    load(MAX_ACTIVE_PROCESSES);
 
-        while (!current_batch->empty()) {
-            nextProcess();
+    while (finished_processes.size() < num_of_processes) {
+        handleKey(wgetch(screen));
 
-            updatePanels();
+        time_step = (new_time = timer.getTime()) - old_time;
+        old_time = new_time;
 
-            if (run(current_process) == Process::INTERRUPTED) {
-                current_batch->push_back(current_process);
-                current_process->state = Process::READY;
-
-            } else {
-                finished_processes.push_back(current_process);
-            }
-
-            current_batch->pop_front();
-        }
-
-        delete(current_batch);
+        update();
+        updateView();
     }
 
     timer.pause();
-    current_batch = NULL;
-    current_process = NULL;
-
-    updatePanels();
 
     nodelay(screen, FALSE);
 }
 
 /**
- * Run a single process.
+ * Loads up to num processes into the ready list. Returns the number of loaded
+ * processes.
  */
-int BatchProcessing::run(Process *process) {
-    unsigned int last_time;
-    unsigned int current_time;
+int ProcessScheduler::load(int num) {
+    Process *process;
+    int loaded;
 
-    last_time = timer.getTime();
+    for (loaded = 0; loaded < num && new_processes.size() > 0; loaded++) {
+        process = new_processes.front();
+        process->arrival_time = timer.getTime();
 
-    process->state = Process::RUNNING;
-
-    while ((process->elapsed_time < process->estimated_time) &&
-           (process->state == Process::RUNNING)) {
-
-        current_time = timer.getTime();
-
-        process->elapsed_time += current_time - last_time;
-        last_time = current_time;
-
-        updateTimers();
-
-        handleKey(wgetch(screen), process);
+        ready_processes.push_back(process);
+        new_processes.pop_front();
     }
 
-    if (process->state == Process::RUNNING) {
-        process->run();
-        process->state = Process::TERMINATED;
+    return loaded;
+}
+
+void ProcessScheduler::update() {
+    if (running_process || serve()) {
+        updateRunningProcess();
     }
 
-    return process->state;
+    updateBlockedProcesses();
 }
 
 /**
- * Obtains the next process of the current batch. The process is left in the batch.
+ * Updates the running process service time, and check if it has terminated.
  */
-void BatchProcessing::nextProcess() {
-    current_process = current_batch->front();
+void ProcessScheduler::updateRunningProcess() {
+    running_process->service_time += time_step;
+
+    if (running_process->service_time >= running_process->estimated_time) {
+        terminate(Process::SUCCESS);
+    }
 }
 
 /**
- * Obtains the next batch and removes it from the queue.
+ * Updates the blocked processes.
  */
-void BatchProcessing::nextBatch() {
-    current_batch = pending_batches.front();
-    pending_batches.pop_front();
+void ProcessScheduler::updateBlockedProcesses() {
+    Process *process;
+    ProcessList::iterator it;
+
+    it = blocked_processes.begin();
+
+    while (it != blocked_processes.end()) {
+        process = *it;
+
+        process->blocked_time += time_step;
+
+        if (process->blocked_time >= MAX_BLOCKED_TIME) {
+            ready_processes.push_back(process);
+
+            it = blocked_processes.erase(it);
+        } else {
+            it++;
+        }
+    }
+}
+
+/**
+ * Serves the next ready process
+ */
+bool ProcessScheduler::serve() {
+    if (ready_processes.size() > 0) {
+        running_process = ready_processes.front();
+
+        if (running_process->arrival_time == -1)
+            running_process->arrival_time = timer.getTime();
+
+        ready_processes.pop_front();
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Terminate the current running process.
+ */
+void ProcessScheduler::terminate(short reason) {
+    Process *process;
+
+    process = running_process;
+    running_process = NULL;
+
+    if (reason == Process::SUCCESS) process->run();
+
+    process->termination_status = reason;
+
+    process->termination_time = timer.getTime();
+    process->turnaround_time = process->termination_time - process->arrival_time;
+    process->waiting_time = process->turnaround_time - process->service_time;
+
+    finished_processes.push_back(process);
+
+    load(1);
 }
 
 /**
  * Handles a key press for a runnig process.
  */
-void BatchProcessing::handleKey(int key, Process *process) {
+void ProcessScheduler::handleKey(int key) {
     switch (key) {
         case INTERRUPT_KEY:
-            process->state = Process::INTERRUPTED;
+            if (running_process) {
+                interrupt();
+            }
             break;
 
         case ERROR_KEY:
-            process->state = Process::ERROR;
+            if (running_process) {
+                terminate(Process::ERROR);
+            }
             break;
 
         case PAUSE_KEY:
@@ -194,10 +236,17 @@ void BatchProcessing::handleKey(int key, Process *process) {
     }
 }
 
+void ProcessScheduler::interrupt() {
+    running_process->blocked_time = 0;
+    blocked_processes.push_back(running_process);
+
+    running_process = NULL;
+}
+
 /**
  * Pauses the simulation.
  */
-void BatchProcessing::pause() {
+void ProcessScheduler::pause() {
     timer.pause();
 
     setMessage("Pausado, presiona 'c' para continuar...");
@@ -208,34 +257,30 @@ void BatchProcessing::pause() {
 }
 
 /**
- * Updates all timers showing in screen: the global timer, the current
- * process elapsed time and time left.
- */
-void BatchProcessing::updateTimers() {
-    total_time_counter->setValue(timer.getTime());
-    process_panel->setTimeLeft(current_process->getTimeLeft());
-    process_panel->setElapsedTime(current_process->elapsed_time);
-    batch_panel->setProcesses(current_batch); // TODO: update only the current process row
-}
-
-/**
  * Updates panels with the current data.
  */
-void BatchProcessing::updatePanels() {
-    process_panel->display(current_process);
-    batch_panel->setProcesses(current_batch);
-    finished_panel->setProcesses(&finished_processes);
+void ProcessScheduler::updateView() {
+    new_processes_counter->setValue(new_processes.size());
+    total_time_counter->setValue(timer.getTime());
+
+    process_panel->display(running_process);
+    ready_panel->setProcesses(ready_processes);
+    blocked_panel->setProcesses(blocked_processes);
+    finished_panel->setProcesses(finished_processes);
 }
 
 /**
  * Shows a list of options in the help window.
  */
-void BatchProcessing::printHelp() {
+void ProcessScheduler::printHelp() {
     stringstream message;
+    string separator;
 
-    message << INTERRUPT_KEY << " = interrupcion de E/S" << endl;
-    message << ERROR_KEY << " = error" << endl;
-    message << PAUSE_KEY << " = pausar" << endl;
+    separator = ", ";
+
+    message << INTERRUPT_KEY << ": interrupcion" << separator;
+    message << ERROR_KEY << ": error" << separator;
+    message << PAUSE_KEY << ": pausar";
 
     setMessage(message.str());
 }

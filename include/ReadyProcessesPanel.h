@@ -1,11 +1,11 @@
-#ifndef _BATCH_PROCESSES_PANEL_INCLUDED_
-#define _BATCH_PROCESSES_PANEL_INCLUDED_
+#ifndef _READY_PROCESSES_PANEL_INCLUDED_
+#define _READY_PROCESSES_PANEL_INCLUDED_
 
 #include "./ProcessesListPanel.h"
 
-class BatchProcessesPanel: public ProcessesListPanel {
+class ReadyProcessesPanel: public ProcessesListPanel {
 public:
-    BatchProcessesPanel(WINDOW *parent, int nlines, int ncols, int begin_x, int begin_y);
+    ReadyProcessesPanel(WINDOW *parent, int nlines, int ncols, int begin_x, int begin_y);
 
 protected:
     void printProcess(Process *process);

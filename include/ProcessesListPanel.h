@@ -2,7 +2,7 @@
 #define _PROCESSES_LIST_PANEL_INCLUDED_
 
 #include "./Panel.h"
-#include "./Batch.h"
+#include "./ProcessList.h"
 
 class ProcessesListPanel: public Panel {
 public:
@@ -10,7 +10,7 @@ public:
     virtual ~ProcessesListPanel();
 
     void post();
-    void setProcesses(Batch *data);
+    void setProcesses(ProcessList &list);
 
 protected:
     void setColumnsHeading(std::string heading);

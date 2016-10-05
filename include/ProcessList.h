@@ -4,8 +4,6 @@
 #include <deque>
 #include "./Process.h"
 
-#define PROCESSES_PER_BATCH 5
-
-typedef deque<Process *> Batch;
+typedef deque<Process *> ProcessList;
 
 #endif

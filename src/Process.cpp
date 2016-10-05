@@ -56,14 +56,14 @@ Process *Process::newRandom() {
 
     // set other data
     process->estimated_time = random(3, 15);
-    process->elapsed_time = 0;
-    process->state = Process::READY;
+    process->service_time = 0;
+    process->arrival_time = -1;
 
     return process;
 }
 
 unsigned int Process::getTimeLeft() {
-    return estimated_time - elapsed_time;
+    return estimated_time - service_time;
 }
 
 /**

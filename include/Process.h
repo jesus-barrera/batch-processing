@@ -19,24 +19,31 @@ public:
     };
 
     enum {
-        READY,
-        RUNNING,
-        TERMINATED,
-        INTERRUPTED,
+        SUCCESS,
         ERROR
     };
 
     static const char *operators[];
 
-    short state;
+    short termination_status;
     unsigned int program_number;
     string programmer_name;
     short operation;
     int left_operand;
     int right_operand;
     int result;
-    unsigned int estimated_time;
-    unsigned int elapsed_time;
+
+    int blocked_time;
+
+    // times
+    int termination_time;
+    int estimated_time;
+
+    int service_time;
+    int arrival_time;
+    int turnaround_time;
+    int waiting_time;
+    int response_time;
 
     static short getOperation(const char* operator_str);
     static Process *newRandom();
