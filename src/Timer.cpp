@@ -36,6 +36,11 @@ clock_t Timer::getTicks() {
         return total_ticks + clock() - last_tick;
     }
 }
-double Timer::getTime() {
+
+double Timer::getSeconds() {
     return (double)getTicks() / CLOCKS_PER_SEC;
+}
+
+unsigned int Timer::getMilliseconds() {
+    return getSeconds() * 1000;
 }

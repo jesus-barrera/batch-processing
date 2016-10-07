@@ -12,9 +12,9 @@ ProcessScheduler::ProcessScheduler() {
     ready_panel = new ReadyProcessesPanel(screen, 8, 17, 2, 0);
     blocked_panel = new BlockedProcessesPanel(screen, 8, 17, 2, 17);
     process_panel = new ProcessPanel(screen, 8, 34, 10, 0);
-    finished_panel = new FinishedProcessesPanel(screen, 17, 35, 2, 42);
+    finished_panel = new FinishedProcessesPanel(screen, 16, 35, 2, 42);
 
-    help_win = derwin(screen, 2, 40, 18, 0);
+    help_win = derwin(screen, 1, SCREEN_COLS, SCREEN_LINES - 1, 0);
     syncok(help_win, TRUE);
 }
 
@@ -74,6 +74,23 @@ void ProcessScheduler::generateProcesses(int num_of_processes) {
     }
 }
 
+void ProcessScheduler::waitForKey(string message, int key) {
+    bool is_nodelay_set;
+
+    setMessage(message);
+
+    is_nodelay_set = is_nodelay(screen);
+    if (is_nodelay_set) nodelay(screen, FALSE);
+
+    if (key == ANY_KEY) {
+        wgetch(screen);
+    } else {
+        while (wgetch(screen) != key);
+    }
+
+    if (is_nodelay_set) nodelay(screen, TRUE);
+}
+
 /**
  * Run all the processes.
  */
@@ -96,7 +113,7 @@ void ProcessScheduler::runSimulation() {
     while (finished_processes.size() < num_of_processes) {
         handleKey(wgetch(screen));
 
-        time_step = (new_time = timer.getTime()) - old_time;
+        time_step = (new_time = timer.getSeconds()) - old_time;
         old_time = new_time;
 
         update();
@@ -109,6 +126,49 @@ void ProcessScheduler::runSimulation() {
 }
 
 /**
+ *
+ */
+void ProcessScheduler::showResults() {
+    ProcessList::iterator it;
+    Process *process;
+
+    werase(screen);
+    wattron(screen, A_REVERSE);
+    mvwprintw(
+        screen,
+        0, 0,
+        "%s | %s | %s | %s | %s | %s | %s | %s\n",
+        "PID",
+        "Llegada",
+        "Finaliza",
+        "Retorno",
+        "Respuesta",
+        "Espera",
+        "Servicio",
+        "Estimado"
+
+    );
+    wattroff(screen, A_REVERSE);
+
+    for (it = finished_processes.begin(); it != finished_processes.end(); it++) {
+        process = *it;
+
+        wprintw(
+            screen,
+            "%-3d | %-7d | %-8d | %-7d | %-9d | %-6d | %-8d | %-8d\n",
+            process->program_number,
+            process->arrival_time,
+            process->termination_time,
+            process->turnaround_time,
+            process->response_time,
+            process->waiting_time,
+            process->service_time,
+            process->estimated_time
+        );
+    }
+}
+
+/**
  * Loads up to num processes into the ready list. Returns the number of loaded
  * processes.
  */
@@ -118,7 +178,7 @@ int ProcessScheduler::load(int num) {
 
     for (loaded = 0; loaded < num && new_processes.size() > 0; loaded++) {
         process = new_processes.front();
-        process->arrival_time = timer.getTime();
+        process->arrival_time = timer.getSeconds();
 
         ready_processes.push_back(process);
         new_processes.pop_front();
@@ -177,8 +237,8 @@ bool ProcessScheduler::serve() {
     if (ready_processes.size() > 0) {
         running_process = ready_processes.front();
 
-        if (running_process->arrival_time == -1)
-            running_process->arrival_time = timer.getTime();
+        if (running_process->response_time == -1)
+            running_process->response_time = timer.getSeconds() - running_process->arrival_time;
 
         ready_processes.pop_front();
 
@@ -201,7 +261,7 @@ void ProcessScheduler::terminate(short reason) {
 
     process->termination_status = reason;
 
-    process->termination_time = timer.getTime();
+    process->termination_time = timer.getSeconds();
     process->turnaround_time = process->termination_time - process->arrival_time;
     process->waiting_time = process->turnaround_time - process->service_time;
 
@@ -249,8 +309,7 @@ void ProcessScheduler::interrupt() {
 void ProcessScheduler::pause() {
     timer.pause();
 
-    setMessage("Pausado, presiona 'c' para continuar...");
-    while (wgetch(screen) != CONTINUE_KEY);
+    waitForKey("Pausado, presiona 'c' para continuar...", CONTINUE_KEY);
 
     printHelp();
     timer.start();
@@ -261,7 +320,7 @@ void ProcessScheduler::pause() {
  */
 void ProcessScheduler::updateView() {
     new_processes_counter->setValue(new_processes.size());
-    total_time_counter->setValue(timer.getTime());
+    total_time_counter->setValue(timer.getSeconds());
 
     process_panel->display(running_process);
     ready_panel->setProcesses(ready_processes);

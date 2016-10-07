@@ -22,13 +22,17 @@ public:
     static const char PAUSE_KEY     = 'p';
     static const char CONTINUE_KEY  = 'c';
 
+    static const int ANY_KEY = -1;
+
     ProcessScheduler();
     ~ProcessScheduler();
 
     void post();
     void setMessage(string message);
     void generateProcesses(int num_of_processes);
+    void waitForKey(string message, int key = ANY_KEY);
     void runSimulation();
+    void showResults();
 
 private:
     WINDOW *help_win;

@@ -4,7 +4,7 @@
 #include <ncurses.h>
 
 #define SCREEN_COLS 78
-#define SCREEN_LINES 21
+#define SCREEN_LINES 20
 
 extern WINDOW *screen;
 

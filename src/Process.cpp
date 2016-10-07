@@ -57,7 +57,7 @@ Process *Process::newRandom() {
     // set other data
     process->estimated_time = random(3, 15);
     process->service_time = 0;
-    process->arrival_time = -1;
+    process->response_time = -1;
 
     return process;
 }

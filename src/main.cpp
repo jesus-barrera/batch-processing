@@ -23,13 +23,15 @@ int main(void) {
     scheduler->generateProcesses(num_of_processes);
     scheduler->post();
 
-    scheduler->setMessage("Presiona una tecla para comenzar...");
-    wgetch(screen);
+    scheduler->waitForKey("Presiona una tecla para comenzar...");
 
     scheduler->runSimulation();
 
-    scheduler->setMessage("Presiona una tecla para salir...");
-    wgetch(screen);
+    scheduler->waitForKey("Presiona una tecla para continuar...");
+
+    scheduler->showResults();
+
+    scheduler->waitForKey("Presiona una tecla para salir...");
 
     finalize();
 
@@ -56,6 +58,7 @@ void initialize() {
 }
 
 void finalize() {
+    delete(scheduler);
     delwin(screen);
     endwin();
 }

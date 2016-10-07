@@ -18,7 +18,8 @@ public:
     void restart();
 
     clock_t getTicks();
-    double getTime();
+    double getSeconds();
+    unsigned int getMilliseconds();
 };
 
 #endif
