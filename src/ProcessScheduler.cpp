@@ -5,17 +5,39 @@
 
 ProcessScheduler::ProcessScheduler() {
     // counters
-    new_processes_counter = new Field<unsigned int>(screen, "Procesos nuevos: ", 0, 0);
-    total_time_counter = new Field<unsigned int>(screen, "Tiempo total: ", 1, 0);
+    new_processes_counter = new Field<unsigned int>(content, "Procesos nuevos: ", 0, 0);
+    total_time_counter = new Field<unsigned int>(content, "Tiempo total: ", 1, 0);
+
+    int offset_y, height, width;
+    offset_y = 2;
 
     // place panels
-    ready_panel = new ReadyProcessesPanel(screen, 8, 17, 2, 0);
-    blocked_panel = new BlockedProcessesPanel(screen, 8, 17, 2, 17);
-    process_panel = new ProcessPanel(screen, 8, 34, 10, 0);
-    finished_panel = new FinishedProcessesPanel(screen, 16, 35, 2, 42);
+    height = (CONTENT_LINES - offset_y) / 2;
+    width = COLS / 2;
 
-    help_win = derwin(screen, 1, SCREEN_COLS, SCREEN_LINES - 1, 0);
-    syncok(help_win, TRUE);
+    ready_panel = new ReadyProcessesPanel(
+        content,
+        height, width / 2,
+        offset_y, 0
+    );
+
+    blocked_panel = new BlockedProcessesPanel(
+        content,
+        height, width / 2,
+        offset_y, width / 2
+    );
+
+    process_panel = new ProcessPanel(
+        content,
+        height, width,
+        offset_y + height, 0
+    );
+
+    finished_panel = new FinishedProcessesPanel(
+        content,
+        height * 2, width,
+        offset_y, width
+    );
 }
 
 ProcessScheduler::~ProcessScheduler() {
@@ -27,8 +49,6 @@ ProcessScheduler::~ProcessScheduler() {
     delete(process_panel);
     delete(finished_panel);
 
-    delwin(help_win);
-
     while (!finished_processes.empty()) {
         delete(finished_processes.back());
         finished_processes.pop_back();
@@ -39,9 +59,6 @@ ProcessScheduler::~ProcessScheduler() {
  * Writes all elements to screen.
  */
 void ProcessScheduler::post() {
-    curs_set(0);
-    noecho();
-
     // show counters
     new_processes_counter->post();
     new_processes_counter->setValue(new_processes.size());
@@ -57,14 +74,6 @@ void ProcessScheduler::post() {
 }
 
 /**
- * Prints a message in the help window. Previous content is erased.
- */
-void ProcessScheduler::setMessage(std::string message) {
-    werase(help_win);
-    mvwaddstr(help_win, 0, 0, message.c_str());
-}
-
-/**
  * Generates a given number of processes randomly. All processes are stored in
  * the new processes list.
  */
@@ -72,23 +81,6 @@ void ProcessScheduler::generateProcesses(int num_of_processes) {
     for (int count = 0; count < num_of_processes; count++) {
         new_processes.push_back(Process::newRandom());
     }
-}
-
-void ProcessScheduler::waitForKey(string message, int key) {
-    bool is_nodelay_set;
-
-    setMessage(message);
-
-    is_nodelay_set = is_nodelay(screen);
-    if (is_nodelay_set) nodelay(screen, FALSE);
-
-    if (key == ANY_KEY) {
-        wgetch(screen);
-    } else {
-        while (wgetch(screen) != key);
-    }
-
-    if (is_nodelay_set) nodelay(screen, TRUE);
 }
 
 /**
@@ -99,11 +91,12 @@ void ProcessScheduler::runSimulation() {
     unsigned int old_time;
     unsigned int num_of_processes;
 
-    wtimeout(screen, 500);
-
     printHelp();
 
+    timeout(500);
+
     num_of_processes = new_processes.size();
+
     running_process = nullptr;
 
     timer.start();
@@ -114,7 +107,7 @@ void ProcessScheduler::runSimulation() {
         serve();
 
         updateView();
-        handleKey(wgetch(screen));
+        handleKey(getch());
 
         time_step = (new_time = timer.getSeconds()) - old_time;
         old_time = new_time;
@@ -127,7 +120,7 @@ void ProcessScheduler::runSimulation() {
 
     updateView();
 
-    wtimeout(screen, -1);
+    timeout(-1);
 }
 
 /**
@@ -137,10 +130,10 @@ void ProcessScheduler::showResults() {
     ProcessList::iterator it;
     Process *process;
 
-    werase(screen);
-    wattron(screen, A_REVERSE);
+    werase(content);
+    wattron(content, A_REVERSE);
     mvwprintw(
-        screen,
+        content,
         0, 0,
         "%s | %s | %s | %s | %s | %s | %s | %s\n",
         "PID",
@@ -153,13 +146,13 @@ void ProcessScheduler::showResults() {
         "Estimado"
 
     );
-    wattroff(screen, A_REVERSE);
+    wattroff(content, A_REVERSE);
 
     for (it = finished_processes.begin(); it != finished_processes.end(); it++) {
         process = *it;
 
         wprintw(
-            screen,
+            content,
             "%-3d | %-7d | %-8d | %-7d | %-9d | %-6d | %-8d | %-8d\n",
             process->program_number,
             process->arrival_time,
@@ -313,7 +306,9 @@ void ProcessScheduler::interrupt() {
 void ProcessScheduler::pause() {
     timer.pause();
 
-    waitForKey("Pausado, presiona 'c' para continuar...", CONTINUE_KEY);
+    setFooter("Pausado!, presiona 'c' para continuar...");
+
+    while (getch() != CONTINUE_KEY);
 
     printHelp();
     timer.start();
@@ -345,5 +340,5 @@ void ProcessScheduler::printHelp() {
     message << ERROR_KEY << ": error" << separator;
     message << PAUSE_KEY << ": pausar";
 
-    setMessage(message.str());
+    setFooter(message.str());
 }

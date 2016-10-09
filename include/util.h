@@ -10,6 +10,4 @@ std::string& trim(std::string &str);
 
 int random(unsigned int min, unsigned int max);
 
-void waitForKey();
-
 #endif

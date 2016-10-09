@@ -7,6 +7,7 @@
 
 void initialize();
 void finalize();
+void pause(std::string message);
 
 WINDOW *screen;
 ProcessScheduler *scheduler;
@@ -16,49 +17,51 @@ int main(void) {
 
     initialize();
 
-    // get number of processes
-    wprintw(screen, "Numero de procesos: ");
-    wscanw(screen, "%d", &num_of_processes);
+    wprintw(content, "Numero de procesos: ");
+    wscanw(content, "%d", &num_of_processes);
+
+    curs_set(0); // hide cursor
+    noecho();    // disable echoing
 
     scheduler->generateProcesses(num_of_processes);
     scheduler->post();
 
-    scheduler->waitForKey("Presiona una tecla para comenzar...");
+    pause("Presiona una tecla para comenzar...");
 
     scheduler->runSimulation();
 
-    scheduler->waitForKey("Presiona una tecla para continuar...");
+    pause("Presiona una tecla para continuar...");
 
     scheduler->showResults();
 
-    scheduler->waitForKey("Presiona una tecla para salir...");
+    pause("Presiona una tecla para salir...");
 
     finalize();
 
     return 0;
 }
 
+void pause(std::string message) {
+    setFooter(message);
+    getch();
+}
+
 void initialize() {
     srand(time(NULL));
 
-    // initialize ncurses
     initscr();
     cbreak();
 
-    // set up main window
-    box(stdscr, 0, 0);
-    printCentered(stdscr, "PROCESAMIENTO POR LOTES", 1, A_BOLD);
-    wnoutrefresh(stdscr);
+    startScreen();
+    keypad(content, TRUE);
 
-    // create subwindow for content
-    screen = derwin(stdscr, SCREEN_LINES, SCREEN_COLS, 3, 1);
-    keypad(screen, TRUE);
+    setHeader("PROCESAMIENTO POR LOTES");
 
     scheduler = new ProcessScheduler();
 }
 
 void finalize() {
     delete(scheduler);
-    delwin(screen);
+    endScreen();
     endwin();
 }
