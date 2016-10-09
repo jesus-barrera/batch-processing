@@ -58,11 +58,11 @@ private:
 
     unsigned int time_step;
 
-    int load(int num);
-    void update();
+    int load();
+    bool serve();
+    int getTotalActiveProcesses();
     void updateRunningProcess();
     void updateBlockedProcesses();
-    bool serve();
     void terminate(short reason);
     void handleKey(int key);
     void interrupt();

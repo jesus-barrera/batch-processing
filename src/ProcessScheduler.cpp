@@ -99,30 +99,35 @@ void ProcessScheduler::runSimulation() {
     unsigned int old_time;
     unsigned int num_of_processes;
 
-    nodelay(screen, TRUE);
+    wtimeout(screen, 500);
 
     printHelp();
 
     num_of_processes = new_processes.size();
+    running_process = nullptr;
 
     timer.start();
     new_time = 0;
 
-    load(MAX_ACTIVE_PROCESSES);
-
     while (finished_processes.size() < num_of_processes) {
+        load();
+        serve();
+
+        updateView();
         handleKey(wgetch(screen));
 
         time_step = (new_time = timer.getSeconds()) - old_time;
         old_time = new_time;
 
-        update();
-        updateView();
+        updateRunningProcess();
+        updateBlockedProcesses();
     }
 
     timer.pause();
 
-    nodelay(screen, FALSE);
+    updateView();
+
+    wtimeout(screen, -1);
 }
 
 /**
@@ -169,14 +174,17 @@ void ProcessScheduler::showResults() {
 }
 
 /**
- * Loads up to num processes into the ready list. Returns the number of loaded
- * processes.
+ * Loads as many processes as posible into the ready list. Returns the number of
+ * loaded processes.
  */
-int ProcessScheduler::load(int num) {
+int ProcessScheduler::load() {
     Process *process;
     int loaded;
+    int max;
 
-    for (loaded = 0; loaded < num && new_processes.size() > 0; loaded++) {
+    max = MAX_ACTIVE_PROCESSES - getTotalActiveProcesses();
+
+    for (loaded = 0; loaded < max && new_processes.size() > 0; loaded++) {
         process = new_processes.front();
         process->arrival_time = timer.getSeconds();
 
@@ -187,22 +195,38 @@ int ProcessScheduler::load(int num) {
     return loaded;
 }
 
-void ProcessScheduler::update() {
-    if (running_process || serve()) {
-        updateRunningProcess();
+/**
+ * Serves the next ready process
+ */
+bool ProcessScheduler::serve() {
+    if (!running_process && ready_processes.size() > 0) {
+        running_process = ready_processes.front();
+
+        if (running_process->response_time == -1)
+            running_process->response_time = timer.getSeconds() - running_process->arrival_time;
+
+        ready_processes.pop_front();
+
+        return true;
     }
 
-    updateBlockedProcesses();
+    return false;
+}
+
+int ProcessScheduler::getTotalActiveProcesses() {
+    return ready_processes.size() + blocked_processes.size() + (running_process != nullptr);
 }
 
 /**
  * Updates the running process service time, and check if it has terminated.
  */
 void ProcessScheduler::updateRunningProcess() {
-    running_process->service_time += time_step;
+    if (running_process != nullptr) {
+        running_process->service_time += time_step;
 
-    if (running_process->service_time >= running_process->estimated_time) {
-        terminate(Process::SUCCESS);
+        if (running_process->service_time >= running_process->estimated_time) {
+            terminate(Process::SUCCESS);
+        }
     }
 }
 
@@ -231,31 +255,13 @@ void ProcessScheduler::updateBlockedProcesses() {
 }
 
 /**
- * Serves the next ready process
- */
-bool ProcessScheduler::serve() {
-    if (ready_processes.size() > 0) {
-        running_process = ready_processes.front();
-
-        if (running_process->response_time == -1)
-            running_process->response_time = timer.getSeconds() - running_process->arrival_time;
-
-        ready_processes.pop_front();
-
-        return true;
-    }
-
-    return false;
-}
-
-/**
  * Terminate the current running process.
  */
 void ProcessScheduler::terminate(short reason) {
     Process *process;
 
     process = running_process;
-    running_process = NULL;
+    running_process = nullptr;
 
     if (reason == Process::SUCCESS) process->run();
 
@@ -266,8 +272,6 @@ void ProcessScheduler::terminate(short reason) {
     process->waiting_time = process->turnaround_time - process->service_time;
 
     finished_processes.push_back(process);
-
-    load(1);
 }
 
 /**
