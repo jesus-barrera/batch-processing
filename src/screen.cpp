@@ -26,9 +26,11 @@ void endScreen() {
 
 void setHeader(std::string title) {
     printCentered(header, title, 1, A_BOLD);
+    wnoutrefresh(header);
 }
 
 void setFooter(std::string message) {
     message.append(COLS - message.size(), ' ');
     mvwaddstr(footer, 0, 0, message.c_str());
+    wnoutrefresh(footer);
 }
