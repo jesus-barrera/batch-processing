@@ -2,42 +2,16 @@
 
 #include "../include/ProcessScheduler.h"
 #include "../include/screen.h"
+#include "../include/GridLayout.h"
 
 ProcessScheduler::ProcessScheduler() {
-    // counters
     new_processes_counter = new Field<unsigned int>(content, "Procesos nuevos: ", 0, 0);
     total_time_counter = new Field<unsigned int>(content, "Tiempo total: ", 1, 0);
 
-    int offset_y, height, width;
-    offset_y = 2;
+    panels_win = derwin(content, CONTENT_LINES - 2, COLS, 2, 0);
+    syncok(panels_win, TRUE);
 
-    // place panels
-    height = (CONTENT_LINES - offset_y) / 2;
-    width = COLS / 2;
-
-    ready_panel = new ReadyProcessesPanel(
-        content,
-        height, width / 2,
-        offset_y, 0
-    );
-
-    blocked_panel = new BlockedProcessesPanel(
-        content,
-        height, width / 2,
-        offset_y, width / 2
-    );
-
-    process_panel = new ProcessPanel(
-        content,
-        height, width,
-        offset_y + height, 0
-    );
-
-    finished_panel = new FinishedProcessesPanel(
-        content,
-        height * 2, width,
-        offset_y, width
-    );
+    initPanels();
 }
 
 ProcessScheduler::~ProcessScheduler() {
@@ -48,6 +22,8 @@ ProcessScheduler::~ProcessScheduler() {
     delete(blocked_panel);
     delete(process_panel);
     delete(finished_panel);
+
+    delwin(panels_win);
 
     while (!finished_processes.empty()) {
         delete(finished_processes.back());
@@ -166,6 +142,47 @@ void ProcessScheduler::showResults() {
     }
 }
 
+void ProcessScheduler::initPanels() {
+    GridLayout grid(panels_win, 2, 4); // 2x4 layout over panels_win
+
+    grid.add(1, 1, 0, 0); // ready panel
+    grid.add(1, 1, 0, 1); // blocked panel
+    grid.add(1, 2, 1, 0); // process panel
+    grid.add(2, 2, 0, 2); // terminated panel
+
+    ready_panel = new ReadyProcessesPanel(
+        panels_win,
+        grid[READY_PANEL].height,
+        grid[READY_PANEL].width,
+        grid[READY_PANEL].y,
+        grid[READY_PANEL].x
+    );
+
+    blocked_panel = new BlockedProcessesPanel(
+        panels_win,
+        grid[BLOCKED_PANEL].height,
+        grid[BLOCKED_PANEL].width,
+        grid[BLOCKED_PANEL].y,
+        grid[BLOCKED_PANEL].x
+    );
+
+    process_panel = new ProcessPanel(
+        panels_win,
+        grid[PROCESS_PANEL].height,
+        grid[PROCESS_PANEL].width,
+        grid[PROCESS_PANEL].y,
+        grid[PROCESS_PANEL].x
+    );
+
+    finished_panel = new FinishedProcessesPanel(
+        panels_win,
+        grid[TERMINATED_PANEL].height,
+        grid[TERMINATED_PANEL].width,
+        grid[TERMINATED_PANEL].y,
+        grid[TERMINATED_PANEL].x
+    );
+}
+
 /**
  * Loads as many processes as posible into the ready list. Returns the number of
  * loaded processes.
@@ -189,7 +206,7 @@ int ProcessScheduler::load() {
 }
 
 /**
- * Serves the next ready process
+ * Serves the next ready process.
  */
 bool ProcessScheduler::serve() {
     if (!running_process && ready_processes.size() > 0) {
@@ -206,6 +223,9 @@ bool ProcessScheduler::serve() {
     return false;
 }
 
+/**
+ * Calculates how many processes are currently in memory.
+ */
 int ProcessScheduler::getTotalActiveProcesses() {
     return ready_processes.size() + blocked_processes.size() + (running_process != nullptr);
 }

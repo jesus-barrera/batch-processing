@@ -1,6 +1,4 @@
-# Batch Processing Emulation
-
-This is a tool for visualizing how batch processing works.
+# First Come First Served (FCFS) Shedululing Algorithm
 
 ## Requirements
 
@@ -11,7 +9,7 @@ This is a tool for visualizing how batch processing works.
 From the project root:
 ```
 # compile source
-g++ src/*.cpp -lncurses -Wall -o bin/<executable_file>
+g++ src/*.cpp -lncurses -Wall -std=c++11 -o bin/<executable_file>
 
 # run the generated file
 bin/<executable_file>

@@ -14,7 +14,7 @@ void startScreen() {
     syncok(content, TRUE);
     syncok(footer, TRUE);
 
-    wattron(footer, A_BOLD);
+    wattron(footer, A_REVERSE);
     setFooter("");
 }
 
