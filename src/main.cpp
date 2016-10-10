@@ -9,7 +9,6 @@ void initialize();
 void finalize();
 void pause(std::string message);
 
-WINDOW *screen;
 ProcessScheduler *scheduler;
 
 int main(void) {
