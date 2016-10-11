@@ -16,15 +16,25 @@ GridLayout::~GridLayout() {
 }
 
 void GridLayout::add(int nrows, int ncols, int start_row, int start_col) {
-    Element *element = new Element();
+    Element *element;
+    int begin_y, begin_x;
+    int max_y, max_x;
 
-    // set real dimenstions
-    element->height = nrows * row_height;
-    element->width = ncols * col_width;
+    element = new Element();
 
-    // set real position
-    element->y = start_row * row_height;
-    element->x = start_col * col_width;
+    begin_y = start_row * row_height;
+    begin_x = start_col * col_width;
+
+    max_y = (start_row + nrows) * row_height;
+    max_x = (start_col + ncols) * col_width;
+
+    // set dimenstions
+    element->height = max_y - begin_y;
+    element->width = max_x - begin_x;
+
+    // set position
+    element->y = begin_y;
+    element->x = begin_x;
 
     // save element
     elements.push_back(element);
