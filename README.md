@@ -9,8 +9,8 @@
 From the project root:
 ```
 # compile source
-g++ src/*.cpp -lncurses -Wall -std=c++11 -o bin/<executable_file>
+$ make
 
-# run the generated file
-bin/<executable_file>
+# run the executable file
+$ bin/scheduler
 ```

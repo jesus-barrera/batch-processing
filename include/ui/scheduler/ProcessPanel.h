@@ -1,8 +1,8 @@
 #ifndef _PROCESS_PANEL_INCLUDED_
 #define _PROCESS_PANEL_INCLUDED_
 
-#include "./Panel.h"
-#include "./Process.h"
+#include "ui/Panel.h"
+#include "Process.h"
 
 class ProcessPanel: public Panel {
 public:

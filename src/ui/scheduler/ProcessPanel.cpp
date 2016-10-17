@@ -1,5 +1,5 @@
 #include <cstdarg>
-#include "../include/ProcessPanel.h"
+#include "ui/scheduler/ProcessPanel.h"
 
 const std::string ProcessPanel::labels[] = {
     "No. programa: ",

@@ -1,9 +1,9 @@
 #include <cstdlib>
 #include <ctime>
 
-#include "../include/screen.h"
-#include "../include/ProcessScheduler.h"
-#include "../include/util.h"
+#include "ui/screen.h"
+#include "ProcessScheduler.h"
+#include "util.h"
 
 void initialize();
 void finalize();

@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include "../include/util.h"
+#include "util.h"
 
 void printCentered(WINDOW *win, std::string text, int row, int attrs) {
     wattron(win, attrs);

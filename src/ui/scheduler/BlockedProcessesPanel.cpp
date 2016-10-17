@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include "../include/BlockedProcessesPanel.h"
+#include "ui/scheduler/BlockedProcessesPanel.h"
 
 BlockedProcessesPanel::BlockedProcessesPanel(
     WINDOW *parent,

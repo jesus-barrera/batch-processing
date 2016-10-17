@@ -1,4 +1,4 @@
-#include "../include/ProcessesListPanel.h"
+#include "ui/scheduler/ProcessesListPanel.h"
 
 ProcessesListPanel::ProcessesListPanel(
         WINDOW *parent,

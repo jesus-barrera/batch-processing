@@ -3,12 +3,12 @@
 
 #include <string>
 
-#include "../include/ProcessPanel.h"
-#include "../include/ReadyProcessesPanel.h"
-#include "../include/BlockedProcessesPanel.h"
-#include "../include/FinishedProcessesPanel.h"
-#include "../include/Field.h"
-#include "../include/Timer.h"
+#include "ui/scheduler/ProcessPanel.h"
+#include "ui/scheduler/ReadyProcessesPanel.h"
+#include "ui/scheduler/BlockedProcessesPanel.h"
+#include "ui/scheduler/FinishedProcessesPanel.h"
+#include "ui/Field.h"
+#include "Timer.h"
 
 using namespace std;
 

@@ -1,8 +1,8 @@
 #include <sstream>
 
-#include "../include/ProcessScheduler.h"
-#include "../include/screen.h"
-#include "../include/GridLayout.h"
+#include "ProcessScheduler.h"
+#include "ui/screen.h"
+#include "ui/GridLayout.h"
 
 ProcessScheduler::ProcessScheduler() {
     new_processes_counter = new Field<unsigned int>(content, "Procesos nuevos: ", 0, 0);

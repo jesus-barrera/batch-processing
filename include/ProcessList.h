@@ -2,7 +2,7 @@
 #define _BATCH_INCLUDED_
 
 #include <deque>
-#include "./Process.h"
+#include "Process.h"
 
 typedef deque<Process *> ProcessList;
 

@@ -1,4 +1,4 @@
-#include "../include/GridLayout.h"
+#include "ui/GridLayout.h"
 
 GridLayout::GridLayout(WINDOW *window, int nrows, int ncols) {
     int y, x;

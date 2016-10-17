@@ -1,5 +1,5 @@
-#include "../include/Panel.h"
-#include "../include/util.h"
+#include "ui/Panel.h"
+#include "util.h"
 
 const int Panel::BORDER_WIDTH = 1;
 

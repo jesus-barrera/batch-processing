@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include "../include/ReadyProcessesPanel.h"
+#include "ui/scheduler/ReadyProcessesPanel.h"
 
 ReadyProcessesPanel::ReadyProcessesPanel(
     WINDOW *parent,

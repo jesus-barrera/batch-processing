@@ -1,5 +1,5 @@
-#include "../include/screen.h"
-#include "../include/util.h"
+#include "ui/screen.h"
+#include "util.h"
 
 WINDOW *header;
 WINDOW *content;

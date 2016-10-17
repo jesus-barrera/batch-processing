@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include "../include/FinishedProcessesPanel.h"
+#include "ui/scheduler/FinishedProcessesPanel.h"
 
 FinishedProcessesPanel::FinishedProcessesPanel(
     WINDOW *parent,

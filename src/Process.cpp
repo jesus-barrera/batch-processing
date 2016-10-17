@@ -2,8 +2,8 @@
 #include <cstring>
 #include <sstream>
 
-#include "../include/Process.h"
-#include "../include/util.h"
+#include "Process.h"
+#include "util.h"
 
 using namespace std;
 
