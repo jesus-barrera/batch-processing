@@ -12,6 +12,8 @@ ProcessScheduler::ProcessScheduler() {
     syncok(panels_win, TRUE);
 
     initPanels();
+
+    num_of_processes = 0;
 }
 
 ProcessScheduler::~ProcessScheduler() {
@@ -57,6 +59,8 @@ void ProcessScheduler::generateProcesses(int num_of_processes) {
     for (int count = 0; count < num_of_processes; count++) {
         new_processes.push_back(Process::newRandom());
     }
+
+    this->num_of_processes += num_of_processes;
 }
 
 /**
@@ -65,13 +69,10 @@ void ProcessScheduler::generateProcesses(int num_of_processes) {
 void ProcessScheduler::runSimulation() {
     unsigned int new_time;
     unsigned int old_time;
-    unsigned int num_of_processes;
 
     printHelp();
 
     timeout(500);
-
-    num_of_processes = new_processes.size();
 
     running_process = nullptr;
 
@@ -306,6 +307,10 @@ void ProcessScheduler::handleKey(int key) {
 
         case PAUSE_KEY:
             pause();
+            break;
+
+        case NEW_PROCESS_KEY:
+            generateProcesses(1);
             break;
 
         default:

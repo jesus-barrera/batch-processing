@@ -18,9 +18,11 @@ public:
     static const int MAX_BLOCKED_TIME = 8;
 
     static const char INTERRUPT_KEY = 'e';
-    static const char ERROR_KEY     = 'w';
-    static const char PAUSE_KEY     = 'p';
-    static const char CONTINUE_KEY  = 'c';
+    static const char ERROR_KEY = 'w';
+    static const char PAUSE_KEY = 'p';
+    static const char CONTINUE_KEY = 'c';
+    static const char NEW_PROCESS_KEY = 'u';
+    static const char BCP_KEY = 'b';
 
     ProcessScheduler();
     ~ProcessScheduler();
@@ -77,6 +79,7 @@ private:
     Timer timer;
 
     unsigned int time_step;
+    unsigned int num_of_processes;
 
     /**
      *
