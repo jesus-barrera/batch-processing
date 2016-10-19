@@ -1,14 +1,12 @@
-#ifndef _BATCH_PROCESSING_INCLUDED_
-#define _BATCH_PROCESSING_INCLUDED_
+#ifndef _PROCESS_SCHEDULER_INCLUDED_
+#define _PROCESS_SCHEDULER_INCLUDED_
 
 #include <string>
 
-#include "ui/scheduler/ProcessPanel.h"
-#include "ui/scheduler/ReadyProcessesPanel.h"
-#include "ui/scheduler/BlockedProcessesPanel.h"
-#include "ui/scheduler/FinishedProcessesPanel.h"
-#include "ui/Field.h"
+#include "ProcessList.h"
 #include "Timer.h"
+
+class ProcessSchedulerView;
 
 using namespace std;
 
@@ -16,20 +14,13 @@ class ProcessScheduler {
 public:
     static const int MAX_ACTIVE_PROCESSES = 5;
     static const int MAX_BLOCKED_TIME = 8;
+    static const int GETCH_TIMEOUT = 500;
 
-    static const char INTERRUPT_KEY = 'e';
-    static const char ERROR_KEY = 'w';
-    static const char PAUSE_KEY = 'p';
-    static const char CONTINUE_KEY = 'c';
-    static const char NEW_PROCESS_KEY = 'u';
-    static const char BCP_KEY = 'b';
+    static const string HELP;
 
     ProcessScheduler();
     ~ProcessScheduler();
 
-    /**
-     * Post simulation interface.
-     */
     void post();
 
     /**
@@ -47,32 +38,14 @@ public:
      */
     void showResults();
 
+    friend ProcessSchedulerView;
+
 private:
-    enum {
-        READY_PANEL,
-        BLOCKED_PANEL,
-        PROCESS_PANEL,
-        TERMINATED_PANEL,
-        NUM_PANELS
-    };
-
-    WINDOW *panels_win;
-
-    // counters
-    Field<unsigned int> *new_processes_counter;
-    Field<unsigned int> *total_time_counter;
-
-    // info panels
-    ReadyProcessesPanel *ready_panel;
-    ProcessPanel *process_panel;
-    BlockedProcessesPanel *blocked_panel;
-    FinishedProcessesPanel *finished_panel;
-
     // lists of processes to store processes in each state
     ProcessList new_processes;
     ProcessList ready_processes;
     ProcessList blocked_processes;
-    ProcessList finished_processes;
+    ProcessList terminated_processes;
 
     Process *running_process;
 
@@ -81,10 +54,13 @@ private:
     unsigned int time_step;
     unsigned int num_of_processes;
 
-    /**
-     *
-     */
-    void initPanels();
+    ProcessSchedulerView *view;
+
+    void initSimulation();
+
+    void endSimulation();
+
+    void update();
 
     /**
      * Loads as many processes as possible into memory.
@@ -131,15 +107,9 @@ private:
      */
     void pause();
 
-    /**
-     * Updates the screen to reflect the simulation state data.
-     */
-    void updateView();
+    void enterPause();
 
-    /**
-     * Displays the list of controls.
-     */
-    void printHelp();
+    void leavePause();
 };
 
 #endif

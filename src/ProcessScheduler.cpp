@@ -1,35 +1,29 @@
 #include <sstream>
 
 #include "ProcessScheduler.h"
+#include "ui/scheduler/ProcessSchedulerView.h"
 #include "ui/screen.h"
-#include "ui/GridLayout.h"
+
+const string ProcessScheduler::HELP =
+    "e: interrupcion | " \
+    "w: error | " \
+    "p: pausa | " \
+    "n: nuevo proceso | " \
+    "b: ver BCPs";
 
 ProcessScheduler::ProcessScheduler() {
-    new_processes_counter = new Field<unsigned int>(content, "Procesos nuevos: ", 0, 0);
-    total_time_counter = new Field<unsigned int>(content, "Tiempo total: ", 1, 0);
-
-    panels_win = derwin(content, CONTENT_LINES - 2, COLS, 2, 0);
-    syncok(panels_win, TRUE);
-
-    initPanels();
-
     num_of_processes = 0;
+
+    view = new ProcessSchedulerView((ProcessScheduler *)this);
 }
 
 ProcessScheduler::~ProcessScheduler() {
-    delete(new_processes_counter);
-    delete(total_time_counter);
+    delete(view);
 
-    delete(ready_panel);
-    delete(blocked_panel);
-    delete(process_panel);
-    delete(finished_panel);
+    while (!terminated_processes.empty()) {
+        delete(terminated_processes.back());
 
-    delwin(panels_win);
-
-    while (!finished_processes.empty()) {
-        delete(finished_processes.back());
-        finished_processes.pop_back();
+        terminated_processes.pop_back();
     }
 }
 
@@ -37,18 +31,7 @@ ProcessScheduler::~ProcessScheduler() {
  * Writes all elements to screen.
  */
 void ProcessScheduler::post() {
-    // show counters
-    new_processes_counter->post();
-    new_processes_counter->setValue(new_processes.size());
-
-    total_time_counter->post();
-    total_time_counter->setValue(0);
-
-    // show panels
-    ready_panel->post();
-    blocked_panel->post();
-    process_panel->post();
-    finished_panel->post();
+    view->post();
 }
 
 /**
@@ -70,39 +53,29 @@ void ProcessScheduler::runSimulation() {
     unsigned int new_time;
     unsigned int old_time;
 
-    printHelp();
+    initSimulation();
 
-    timeout(500);
-
-    running_process = nullptr;
-
-    timer.start();
     new_time = 0;
 
-    while (finished_processes.size() < num_of_processes) {
+    while (terminated_processes.size() < num_of_processes) {
         load();
         serve();
 
-        updateView();
+        view->update();
+
         handleKey(getch());
 
         time_step = (new_time = timer.getSeconds()) - old_time;
         old_time = new_time;
 
-        updateRunningProcess();
-        updateBlockedProcesses();
+        update();
     }
 
-    timer.pause();
+    view->update();
 
-    updateView();
-
-    timeout(-1);
+    endSimulation();
 }
 
-/**
- *
- */
 void ProcessScheduler::showResults() {
     ProcessList::iterator it;
     Process *process;
@@ -125,7 +98,7 @@ void ProcessScheduler::showResults() {
     );
     wattroff(content, A_REVERSE);
 
-    for (it = finished_processes.begin(); it != finished_processes.end(); it++) {
+    for (it = terminated_processes.begin(); it != terminated_processes.end(); it++) {
         process = *it;
 
         wprintw(
@@ -143,45 +116,22 @@ void ProcessScheduler::showResults() {
     }
 }
 
-void ProcessScheduler::initPanels() {
-    GridLayout grid(panels_win, 2, 4); // 2x4 layout over panels_win
+void ProcessScheduler::initSimulation() {
+    setFooter(HELP);
+    timeout(GETCH_TIMEOUT);
+    timer.restart();
 
-    grid.add(1, 1, 0, 0); // ready panel
-    grid.add(1, 1, 0, 1); // blocked panel
-    grid.add(1, 2, 1, 0); // process panel
-    grid.add(2, 2, 0, 2); // terminated panel
+    running_process = nullptr;
+}
 
-    ready_panel = new ReadyProcessesPanel(
-        panels_win,
-        grid[READY_PANEL].height,
-        grid[READY_PANEL].width,
-        grid[READY_PANEL].y,
-        grid[READY_PANEL].x
-    );
+void ProcessScheduler::endSimulation() {
+    timer.pause();
+    timeout(-1);
+}
 
-    blocked_panel = new BlockedProcessesPanel(
-        panels_win,
-        grid[BLOCKED_PANEL].height,
-        grid[BLOCKED_PANEL].width,
-        grid[BLOCKED_PANEL].y,
-        grid[BLOCKED_PANEL].x
-    );
-
-    process_panel = new ProcessPanel(
-        panels_win,
-        grid[PROCESS_PANEL].height,
-        grid[PROCESS_PANEL].width,
-        grid[PROCESS_PANEL].y,
-        grid[PROCESS_PANEL].x
-    );
-
-    finished_panel = new FinishedProcessesPanel(
-        panels_win,
-        grid[TERMINATED_PANEL].height,
-        grid[TERMINATED_PANEL].width,
-        grid[TERMINATED_PANEL].y,
-        grid[TERMINATED_PANEL].x
-    );
+void ProcessScheduler::update() {
+    updateRunningProcess();
+    updateBlockedProcesses();
 }
 
 /**
@@ -235,7 +185,7 @@ int ProcessScheduler::getTotalActiveProcesses() {
  * Updates the running process service time, and check if it has terminated.
  */
 void ProcessScheduler::updateRunningProcess() {
-    if (running_process != nullptr) {
+    if (running_process) {
         running_process->service_time += time_step;
 
         if (running_process->service_time >= running_process->estimated_time) {
@@ -285,7 +235,7 @@ void ProcessScheduler::terminate(short reason) {
     process->turnaround_time = process->termination_time - process->arrival_time;
     process->waiting_time = process->turnaround_time - process->service_time;
 
-    finished_processes.push_back(process);
+    terminated_processes.push_back(process);
 }
 
 /**
@@ -293,23 +243,19 @@ void ProcessScheduler::terminate(short reason) {
  */
 void ProcessScheduler::handleKey(int key) {
     switch (key) {
-        case INTERRUPT_KEY:
-            if (running_process) {
-                interrupt();
-            }
+        case 'e': case 'E':
+            if (running_process) interrupt();
             break;
 
-        case ERROR_KEY:
-            if (running_process) {
-                terminate(Process::ERROR);
-            }
+        case 'w': case 'W':
+            if (running_process) terminate(Process::ERROR);
             break;
 
-        case PAUSE_KEY:
+        case 'p': case 'P':
             pause();
             break;
 
-        case NEW_PROCESS_KEY:
+        case 'n': case 'N':
             generateProcesses(1);
             break;
 
@@ -329,41 +275,23 @@ void ProcessScheduler::interrupt() {
  * Pauses the simulation.
  */
 void ProcessScheduler::pause() {
+    int ch;
+
+    enterPause();
+
+    while ((ch = getch()) != 'c' && ch != 'C');
+
+    leavePause();
+}
+
+void ProcessScheduler::enterPause() {
     timer.pause();
+    timeout(-1);
+    setFooter("Pausado!, presiona c para continuar...");
+}
 
-    setFooter("Pausado!, presiona 'c' para continuar...");
-
-    while (getch() != CONTINUE_KEY);
-
-    printHelp();
+void ProcessScheduler::leavePause() {
+    timeout(GETCH_TIMEOUT);
+    setFooter(HELP);
     timer.start();
-}
-
-/**
- * Updates panels with the current data.
- */
-void ProcessScheduler::updateView() {
-    new_processes_counter->setValue(new_processes.size());
-    total_time_counter->setValue(timer.getSeconds());
-
-    process_panel->display(running_process);
-    ready_panel->setProcesses(ready_processes);
-    blocked_panel->setProcesses(blocked_processes);
-    finished_panel->setProcesses(finished_processes);
-}
-
-/**
- * Shows a list of options in the help window.
- */
-void ProcessScheduler::printHelp() {
-    stringstream message;
-    string separator;
-
-    separator = ", ";
-
-    message << INTERRUPT_KEY << ": interrupcion" << separator;
-    message << ERROR_KEY << ": error" << separator;
-    message << PAUSE_KEY << ": pausar";
-
-    setFooter(message.str());
 }
