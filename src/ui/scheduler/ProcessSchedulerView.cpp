@@ -6,11 +6,15 @@
 ProcessSchedulerView::ProcessSchedulerView(ProcessScheduler *scheduler) {
     this->scheduler = scheduler;
 
+    // counters
     new_processes_counter = new Counter(content, "Procesos nuevos: ", 0, 0);
     total_time_counter = new Counter(content, "Tiempo total: ", 1, 0);
 
+    // create window for panels; skip two rows for counters
     panels_win = derwin(content, CONTENT_LINES - 2, COLS, 2, 0);
     syncok(panels_win, TRUE);
+
+    pcb_table = new PCBTable(content);
 
     initPanels();
 }
@@ -24,13 +28,15 @@ ProcessSchedulerView::~ProcessSchedulerView() {
     delete(process_panel);
     delete(terminated_panel);
 
+    delete(pcb_table);
+
     delwin(panels_win);
 }
 
 /**
  * Writes all elements to screen.
  */
-void ProcessSchedulerView::post() {
+void ProcessSchedulerView::postPanels() {
     // show counters
     new_processes_counter->post();
     total_time_counter->post();
@@ -44,12 +50,17 @@ void ProcessSchedulerView::post() {
     update();
 }
 
+void ProcessSchedulerView::postTable() {
+    pcb_table->post();
+    pcb_table->setData(scheduler->pcb_table);
+}
+
 /**
  * Updates panels with the current data.
  */
 void ProcessSchedulerView::update() {
     new_processes_counter->setValue(scheduler->new_processes.size());
-    total_time_counter->setValue(scheduler->timer.getSeconds());
+    total_time_counter->setValue(scheduler->global_time);
 
     process_panel->display(scheduler->running_process);
     ready_panel->setData(scheduler->ready_processes);

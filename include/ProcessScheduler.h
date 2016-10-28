@@ -46,12 +46,13 @@ private:
     ProcessList ready_processes;
     ProcessList blocked_processes;
     ProcessList terminated_processes;
+    ProcessList pcb_table;
 
     Process *running_process;
 
     Timer timer;
 
-    unsigned int time_step;
+    unsigned int global_time;
     unsigned int num_of_processes;
 
     ProcessSchedulerView *view;
@@ -76,6 +77,8 @@ private:
      * Calculates how many processes are currently in memory.
      */
     int getTotalActiveProcesses();
+
+    void updateReadyProcesses();
 
     /**
      * Updates the elapsed time of the running process and checks if it's terminated.
@@ -110,6 +113,8 @@ private:
     void enterPause();
 
     void leavePause();
+
+    void showBCPTable();
 };
 
 #endif

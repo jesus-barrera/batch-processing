@@ -11,6 +11,19 @@ const char *Process::operators[NUM_OF_OPS + 1] = {
     "+", "-", "*", "/", "%", "^", "%%", NULL
 };
 
+Process::Process() {
+    // invalidate times
+    blocked_time     = -1;
+    termination_time = -1;
+    estimated_time   = -1;
+    service_time     = -1;
+    arrival_time     = -1;
+    turnaround_time  = -1;
+    waiting_time     = -1;
+    response_time    = -1;
+    estimated_time   = -1;
+}
+
 /**
  * Gets the operation value for a given operator.
  */
@@ -56,8 +69,6 @@ Process *Process::newRandom() {
 
     // set other data
     process->estimated_time = random(3, 15);
-    process->service_time = 0;
-    process->response_time = -1;
 
     return process;
 }

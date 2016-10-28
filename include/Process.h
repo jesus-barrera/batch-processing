@@ -18,14 +18,16 @@ public:
         NUM_OF_OPS
     };
 
-    enum {
-        SUCCESS,
-        ERROR
-    };
+    // termination reasons
+    enum { SUCCESS, ERROR };
+
+    // process status
+    enum { NEW, READY, RUNNING, BLOCKED, TERMINATED };
 
     static const char *operators[];
 
     short termination_status;
+    int state;
     unsigned int program_number;
     string programmer_name;
     short operation;
@@ -48,6 +50,7 @@ public:
     static short getOperation(const char* operator_str);
     static Process *newRandom();
 
+    Process();
     unsigned int getTimeLeft();
     int run();
 };

@@ -8,11 +8,12 @@ const string ProcessScheduler::HELP =
     "e: interrupcion | " \
     "w: error | " \
     "p: pausa | " \
-    "n: nuevo proceso | " \
+    "u: nuevo proceso | " \
     "b: ver BCPs";
 
 ProcessScheduler::ProcessScheduler() {
     num_of_processes = 0;
+    global_time = 0;
 
     view = new ProcessSchedulerView((ProcessScheduler *)this);
 }
@@ -20,10 +21,10 @@ ProcessScheduler::ProcessScheduler() {
 ProcessScheduler::~ProcessScheduler() {
     delete(view);
 
-    while (!terminated_processes.empty()) {
-        delete(terminated_processes.back());
+    while (!pcb_table.empty()) {
+        delete(pcb_table.back());
 
-        terminated_processes.pop_back();
+        pcb_table.pop_back();
     }
 }
 
@@ -31,7 +32,7 @@ ProcessScheduler::~ProcessScheduler() {
  * Writes all elements to screen.
  */
 void ProcessScheduler::post() {
-    view->post();
+    view->postPanels();
 }
 
 /**
@@ -39,8 +40,14 @@ void ProcessScheduler::post() {
  * the new processes list.
  */
 void ProcessScheduler::generateProcesses(int num_of_processes) {
+    Process *process;
+
     for (int count = 0; count < num_of_processes; count++) {
-        new_processes.push_back(Process::newRandom());
+        process = Process::newRandom();
+        process->state = Process::NEW;
+
+        new_processes.push_back(process);
+        pcb_table.push_back(process);
     }
 
     this->num_of_processes += num_of_processes;
@@ -50,86 +57,45 @@ void ProcessScheduler::generateProcesses(int num_of_processes) {
  * Run all the processes.
  */
 void ProcessScheduler::runSimulation() {
-    unsigned int new_time;
-    unsigned int old_time;
-
     initSimulation();
 
-    new_time = 0;
-
     while (terminated_processes.size() < num_of_processes) {
+        if (timer.getSeconds() >= 1) {
+            global_time++;
+
+            update();
+
+            timer.restart();
+        }
+
+        handleKey(getch());
+
         load();
         serve();
 
         view->update();
-
-        handleKey(getch());
-
-        time_step = (new_time = timer.getSeconds()) - old_time;
-        old_time = new_time;
-
-        update();
     }
-
-    view->update();
 
     endSimulation();
 }
 
 void ProcessScheduler::showResults() {
-    ProcessList::iterator it;
-    Process *process;
-
-    werase(content);
-    wattron(content, A_REVERSE);
-    mvwprintw(
-        content,
-        0, 0,
-        "%s | %s | %s | %s | %s | %s | %s | %s\n",
-        "PID",
-        "Llegada",
-        "Finaliza",
-        "Retorno",
-        "Respuesta",
-        "Espera",
-        "Servicio",
-        "Estimado"
-
-    );
-    wattroff(content, A_REVERSE);
-
-    for (it = terminated_processes.begin(); it != terminated_processes.end(); it++) {
-        process = *it;
-
-        wprintw(
-            content,
-            "%-3d | %-7d | %-8d | %-7d | %-9d | %-6d | %-8d | %-8d\n",
-            process->program_number,
-            process->arrival_time,
-            process->termination_time,
-            process->turnaround_time,
-            process->response_time,
-            process->waiting_time,
-            process->service_time,
-            process->estimated_time
-        );
-    }
+    view->postTable();
 }
 
 void ProcessScheduler::initSimulation() {
-    setFooter(HELP);
-    timeout(GETCH_TIMEOUT);
-    timer.restart();
+    setFooter(HELP); // print help
+    timeout(GETCH_TIMEOUT); // set getch timeout
 
-    running_process = nullptr;
+    timer.restart();
 }
 
 void ProcessScheduler::endSimulation() {
-    timer.pause();
     timeout(-1);
 }
 
 void ProcessScheduler::update() {
+    updateReadyProcesses();
     updateRunningProcess();
     updateBlockedProcesses();
 }
@@ -147,7 +113,11 @@ int ProcessScheduler::load() {
 
     for (loaded = 0; loaded < max && new_processes.size() > 0; loaded++) {
         process = new_processes.front();
-        process->arrival_time = timer.getSeconds();
+
+        process->state = Process::READY;
+        process->arrival_time = global_time;
+        process->waiting_time = 0;
+        process->service_time = 0;
 
         ready_processes.push_back(process);
         new_processes.pop_front();
@@ -164,7 +134,9 @@ bool ProcessScheduler::serve() {
         running_process = ready_processes.front();
 
         if (running_process->response_time == -1)
-            running_process->response_time = timer.getSeconds() - running_process->arrival_time;
+            running_process->response_time = global_time - running_process->arrival_time;
+
+        running_process->state = Process::RUNNING;
 
         ready_processes.pop_front();
 
@@ -181,12 +153,18 @@ int ProcessScheduler::getTotalActiveProcesses() {
     return ready_processes.size() + blocked_processes.size() + (running_process != nullptr);
 }
 
+void ProcessScheduler::updateReadyProcesses() {
+    for (ProcessList::iterator it = ready_processes.begin(); it != ready_processes.end(); it++) {
+        (*it)->waiting_time++;
+    }
+}
+
 /**
  * Updates the running process service time, and check if it has terminated.
  */
 void ProcessScheduler::updateRunningProcess() {
     if (running_process) {
-        running_process->service_time += time_step;
+        running_process->service_time++;
 
         if (running_process->service_time >= running_process->estimated_time) {
             terminate(Process::SUCCESS);
@@ -206,11 +184,14 @@ void ProcessScheduler::updateBlockedProcesses() {
     while (it != blocked_processes.end()) {
         process = *it;
 
-        process->blocked_time += time_step;
+        process->blocked_time++;
+        process->waiting_time++;
 
         if (process->blocked_time >= MAX_BLOCKED_TIME) {
-            ready_processes.push_back(process);
+            process->state = Process::READY;
+            process->blocked_time = -1;
 
+            ready_processes.push_back(process);
             it = blocked_processes.erase(it);
         } else {
             it++;
@@ -231,9 +212,10 @@ void ProcessScheduler::terminate(short reason) {
 
     process->termination_status = reason;
 
-    process->termination_time = timer.getSeconds();
+    process->termination_time = global_time;
     process->turnaround_time = process->termination_time - process->arrival_time;
-    process->waiting_time = process->turnaround_time - process->service_time;
+
+    process->state = Process::TERMINATED;
 
     terminated_processes.push_back(process);
 }
@@ -255,8 +237,12 @@ void ProcessScheduler::handleKey(int key) {
             pause();
             break;
 
-        case 'n': case 'N':
+        case 'u': case 'U':
             generateProcesses(1);
+            break;
+
+        case 'b': case 'B':
+            showBCPTable();
             break;
 
         default:
@@ -266,8 +252,9 @@ void ProcessScheduler::handleKey(int key) {
 
 void ProcessScheduler::interrupt() {
     running_process->blocked_time = 0;
-    blocked_processes.push_back(running_process);
+    running_process->state = Process::BLOCKED;
 
+    blocked_processes.push_back(running_process);
     running_process = NULL;
 }
 
@@ -294,4 +281,10 @@ void ProcessScheduler::leavePause() {
     timeout(GETCH_TIMEOUT);
     setFooter(HELP);
     timer.start();
+}
+
+void ProcessScheduler::showBCPTable() {
+    view->postTable();
+    pause();
+    view->postPanels();
 }

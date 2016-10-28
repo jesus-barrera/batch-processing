@@ -5,6 +5,7 @@
 #include "FinishedProcessesPanel.h"
 #include "ReadyProcessesPanel.h"
 #include "ProcessPanel.h"
+#include "PCBTable.h"
 #include "ui/Field.h"
 
 class ProcessScheduler;
@@ -26,12 +27,16 @@ public:
     ProcessSchedulerView(ProcessScheduler *scheduler);
     ~ProcessSchedulerView();
 
-    void post();
+    void postPanels();
+    void postTable();
+
     void update();
 
 private:
     Counter *new_processes_counter;
     Counter *total_time_counter;
+
+    PCBTable *pcb_table;
 
     ReadyProcessesPanel *ready_panel;
     ProcessPanel *process_panel;
