@@ -16,13 +16,13 @@ FinishedProcessesPanel::FinishedProcessesPanel(
     heading << setw(2) << "ID" << " | "
             << " Operacion";
 
-    setColumnsHeading(heading.str());
+    setHeading(heading.str());
 }
 
-void FinishedProcessesPanel::printProcess(Process *process) {
+void FinishedProcessesPanel::printRow(Process *process) {
     if (process->termination_status == Process::SUCCESS) {
         wprintw(
-            inner_win,
+            data_win,
             "%-2d | %-4d %-2s %-4d = %-4d",
             process->program_number,
             process->left_operand,
@@ -32,7 +32,7 @@ void FinishedProcessesPanel::printProcess(Process *process) {
         );
     } else {
         wprintw(
-            inner_win,
+            data_win,
             "%-2d | %-4d %-2s %-4d = %-4s",
             process->program_number,
             process->left_operand,

@@ -8,7 +8,7 @@ public:
     ReadyProcessesPanel(WINDOW *parent, int nlines, int ncols, int begin_x, int begin_y);
 
 protected:
-    void printProcess(Process *process);
+    void printRow(Process *process);
 };
 
 #endif

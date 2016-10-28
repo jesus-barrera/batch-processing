@@ -52,9 +52,9 @@ void ProcessSchedulerView::update() {
     total_time_counter->setValue(scheduler->timer.getSeconds());
 
     process_panel->display(scheduler->running_process);
-    ready_panel->setProcesses(scheduler->ready_processes);
-    blocked_panel->setProcesses(scheduler->blocked_processes);
-    terminated_panel->setProcesses(scheduler->terminated_processes);
+    ready_panel->setData(scheduler->ready_processes);
+    blocked_panel->setData(scheduler->blocked_processes);
+    terminated_panel->setData(scheduler->terminated_processes);
 }
 
 void ProcessSchedulerView::initPanels() {

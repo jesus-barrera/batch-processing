@@ -17,12 +17,12 @@ ReadyProcessesPanel::ReadyProcessesPanel(
             << setw(2) << "TE" << " | "
             << setw(2) << "TR";
 
-    setColumnsHeading(heading.str());
+    setHeading(heading.str());
 }
 
-void ReadyProcessesPanel::printProcess(Process *process) {
+void ReadyProcessesPanel::printRow(Process *process) {
     wprintw(
-        inner_win,
+        data_win,
         "%-2lu | %-2lu | %-2lu",
         process->program_number,
         process->estimated_time,

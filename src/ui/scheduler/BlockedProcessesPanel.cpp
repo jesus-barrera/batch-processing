@@ -16,12 +16,12 @@ BlockedProcessesPanel::BlockedProcessesPanel(
     heading << setw(2) << "ID" << " | "
             << setw(3) << "TTB";
 
-    setColumnsHeading(heading.str());
+    setHeading(heading.str());
 }
 
-void BlockedProcessesPanel::printProcess(Process *process) {
+void BlockedProcessesPanel::printRow(Process *process) {
     wprintw(
-        inner_win,
+        data_win,
         "%-2lu | %-3lu",
         process->program_number,
         process->blocked_time
