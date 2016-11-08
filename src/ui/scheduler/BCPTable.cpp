@@ -7,6 +7,10 @@ using namespace std;
 
 const string PCBTable::SEPARATOR = " | ";
 
+const char PCBTable::str_states[] = {
+    'N', 'L', 'E', 'B', 'T'
+};
+
 PCBTable::PCBTable(WINDOW *window)
         : ProcessesTable(window) {
 
@@ -21,7 +25,8 @@ PCBTable::PCBTable(WINDOW *window)
             << setw(3) << "TS" << SEPARATOR
             << setw(3) << "TR" << SEPARATOR
             << setw(3) << "TB" << SEPARATOR
-            << setw(3) << "TME";
+            << setw(3) << "TME" << SEPARATOR
+            << "Operacion";
 
     setHeading(heading.str());
 }
@@ -34,7 +39,7 @@ void PCBTable::printRow(Process *process) {
     stringstream row;
 
     row << setw(3) << process->program_number << SEPARATOR
-        << setw(3) << process->state << SEPARATOR
+        << setw(3) << str_states[process->state] << SEPARATOR
         << formatTime(process->arrival_time, 3) << SEPARATOR
         << formatTime(process->termination_time, 3) << SEPARATOR
         << formatTime(process->turnaround_time, 3) << SEPARATOR
@@ -42,7 +47,8 @@ void PCBTable::printRow(Process *process) {
         << formatTime(process->service_time, 3) << SEPARATOR
         << formatTime(process->response_time, 3) << SEPARATOR
         << formatTime(process->blocked_time, 3) << SEPARATOR
-        << formatTime(process->estimated_time, 3);
+        << formatTime(process->estimated_time, 3) << SEPARATOR
+        << formatOperation(process);
 
     waddstr(data_win, row.str().c_str());
 }
@@ -59,4 +65,27 @@ string PCBTable::formatTime(int value, int width) {
     }
 
     return ss_time.str();
+}
+
+string PCBTable::formatOperation(Process *process) {
+    stringstream ss_operation;
+
+    // set operation
+    ss_operation << left << setw(4) << process->left_operand
+                 << left << setw(2) << Process::operators[process->operation]
+                 << left << setw(4) << process->right_operand
+                 << " = ";
+
+    // set result
+    if (process->state == Process::TERMINATED) {
+        if (process->termination_status == Process::SUCCESS) {
+            ss_operation << process->result;
+        } else {
+            ss_operation << "ERROR!";
+        }
+    } else {
+        ss_operation << "NA";
+    }
+
+    return ss_operation.str();
 }

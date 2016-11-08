@@ -21,7 +21,7 @@ public:
     // termination reasons
     enum { SUCCESS, ERROR };
 
-    // process status
+    // process state
     enum { NEW, READY, RUNNING, BLOCKED, TERMINATED };
 
     static const char *operators[];

@@ -3,13 +3,18 @@
 
 #include "ui/Panel.h"
 #include "ui/Table.h"
-#include "ProcessList.h"
+#include "Process.h"
 
 typedef Table<Process *> ProcessesTable;
 
 class ProcessesListPanel: public Panel, public ProcessesTable {
 public:
-    ProcessesListPanel(WINDOW *parent, std::string title, int nlines, int ncols, int begin_x, int begin_y);
+    ProcessesListPanel(
+        WINDOW *parent,
+        std::string title,
+        int nlines, int ncols,
+        int begin_x, int begin_y);
+
     virtual ~ProcessesListPanel();
 
     void post();
