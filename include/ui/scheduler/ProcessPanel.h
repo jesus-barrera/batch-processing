@@ -13,6 +13,7 @@ public:
         ESTIMATED_TIME_FIELD,
         ELAPSED_TIME_FIELD,
         TIME_LEFT_FIELD,
+        QUANTUM_FIELD,
         NUM_OF_FIELDS
     };
 
@@ -31,6 +32,7 @@ public:
     void setEstimatedTime(unsigned int estimated_time);
     void setElapsedTime(unsigned int elapsed_time);
     void setTimeLeft(unsigned int time_left);
+    void setQuantum(unsigned int time_left);
 
 private:
     void printLabels();

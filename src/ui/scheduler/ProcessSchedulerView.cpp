@@ -66,6 +66,10 @@ void ProcessSchedulerView::update() {
     ready_panel->setData(scheduler->ready_processes);
     blocked_panel->setData(scheduler->blocked_processes);
     terminated_panel->setData(scheduler->terminated_processes);
+
+    if (scheduler->running_process) {
+        process_panel->setQuantum(scheduler->cpu_time);
+    }
 }
 
 void ProcessSchedulerView::initPanels() {

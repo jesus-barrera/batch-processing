@@ -5,9 +5,10 @@ const std::string ProcessPanel::labels[] = {
     "No. programa: ",
     "Nombre: ",
     "Operacion: ",
-    "TE: ",
-    "TT: ",
-    "TR: "
+    "T. Estimado: ",
+    "T. Transcurrido: ",
+    "T. Restante: ",
+    "Quantum: "
 };
 
 ProcessPanel::ProcessPanel(WINDOW *parent, int nlines, int ncols, int begin_x, int begin_y)
@@ -77,6 +78,10 @@ void ProcessPanel::setElapsedTime(unsigned int elapsed_time) {
 
 void ProcessPanel::setTimeLeft(unsigned int time_left) {
     setField(TIME_LEFT_FIELD, "%lu", time_left);
+}
+
+void ProcessPanel::setQuantum(unsigned int quantum) {
+    setField(QUANTUM_FIELD, "%lu", quantum);
 }
 
 /**
