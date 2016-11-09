@@ -13,15 +13,20 @@ ProcessScheduler *scheduler;
 
 int main(void) {
     int num_of_processes;
+    int quantum;
 
     initialize();
 
     wprintw(content, "Numero de procesos: ");
     wscanw(content, "%d", &num_of_processes);
 
+    wprintw(content, "Quantum: ");
+    wscanw(content, "%d", &quantum);
+
     curs_set(0); // hide cursor
     noecho();    // disable echoing
 
+    scheduler->setQuantum(quantum);
     scheduler->generateProcesses(num_of_processes);
     scheduler->post();
 

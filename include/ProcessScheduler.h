@@ -21,6 +21,8 @@ public:
     ProcessScheduler();
     ~ProcessScheduler();
 
+    void setQuantum(int quantum);
+
     void post();
 
     /**
@@ -54,6 +56,8 @@ private:
 
     unsigned int global_time;
     unsigned int num_of_processes;
+    unsigned int quantum;
+    unsigned int cpu_time;
 
     ProcessSchedulerView *view;
 
@@ -71,7 +75,7 @@ private:
     /**
      * Serves the next ready process.
      */
-    bool serve();
+    void serve();
 
     /**
      * Calculates how many processes are currently in memory.
@@ -94,6 +98,8 @@ private:
      * Terminates the running process with the given reason.
      */
     void terminate(short reason);
+
+    void suspend();
 
     /**
      * Handles a key press during simulation.

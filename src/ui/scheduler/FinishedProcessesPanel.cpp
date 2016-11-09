@@ -20,25 +20,18 @@ FinishedProcessesPanel::FinishedProcessesPanel(
 }
 
 void FinishedProcessesPanel::printRow(Process *process) {
-    if (process->termination_status == Process::SUCCESS) {
-        wprintw(
-            data_win,
-            "%-2d | %-4d %-2s %-4d = %-4d",
-            process->program_number,
-            process->left_operand,
-            Process::operators[process->operation],
-            process->right_operand,
-            process->result
-        );
-    } else {
-        wprintw(
-            data_win,
-            "%-2d | %-4d %-2s %-4d = %-4s",
-            process->program_number,
-            process->left_operand,
-            Process::operators[process->operation],
-            process->right_operand,
-            "ERROR!"
-        );
-    }
+    stringstream row;
+
+    row << left << setw(2) << process->program_number << " | "
+        << left << setw(3) << process->left_operand << " "
+        << left << setw(2) << Process::operators[process->operation] << " "
+        << left << setw(3) << process->right_operand << " = ";
+
+        if (process->termination_status == Process::SUCCESS) {
+            row << process->result;
+        } else {
+            row << "ERROR!";
+        }
+
+    waddstr(data_win, row.str().c_str());
 }

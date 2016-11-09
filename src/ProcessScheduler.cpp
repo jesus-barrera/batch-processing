@@ -28,6 +28,10 @@ ProcessScheduler::~ProcessScheduler() {
     }
 }
 
+void ProcessScheduler::setQuantum(int quantum) {
+    this->quantum = quantum;
+}
+
 /**
  * Writes all elements to screen.
  */
@@ -129,21 +133,17 @@ int ProcessScheduler::load() {
 /**
  * Serves the next ready process.
  */
-bool ProcessScheduler::serve() {
+void ProcessScheduler::serve() {
     if (!running_process && ready_processes.size() > 0) {
         running_process = ready_processes.front();
+        ready_processes.pop_front();
 
         if (running_process->response_time == -1)
             running_process->response_time = global_time - running_process->arrival_time;
 
         running_process->state = Process::RUNNING;
-
-        ready_processes.pop_front();
-
-        return true;
+        cpu_time = 0;
     }
-
-    return false;
 }
 
 /**
@@ -165,9 +165,12 @@ void ProcessScheduler::updateReadyProcesses() {
 void ProcessScheduler::updateRunningProcess() {
     if (running_process) {
         running_process->service_time++;
+        cpu_time++;
 
         if (running_process->service_time >= running_process->estimated_time) {
             terminate(Process::SUCCESS);
+        } else if (cpu_time >= quantum) {
+            suspend();
         }
     }
 }
@@ -218,6 +221,12 @@ void ProcessScheduler::terminate(short reason) {
     process->state = Process::TERMINATED;
 
     terminated_processes.push_back(process);
+}
+
+void ProcessScheduler::suspend() {
+    ready_processes.push_back(running_process);
+    running_process->state = Process::READY;
+    running_process = NULL;
 }
 
 /**

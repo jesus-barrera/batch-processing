@@ -71,10 +71,10 @@ string PCBTable::formatOperation(Process *process) {
     stringstream ss_operation;
 
     // set operation
-    ss_operation << left << setw(4) << process->left_operand
-                 << left << setw(2) << Process::operators[process->operation]
-                 << left << setw(4) << process->right_operand
-                 << " = ";
+    ss_operation
+        << left << setw(3) << process->left_operand << " "
+        << left << setw(2) << Process::operators[process->operation] << " "
+        << left << setw(3) << process->right_operand << " = ";
 
     // set result
     if (process->state == Process::TERMINATED) {
