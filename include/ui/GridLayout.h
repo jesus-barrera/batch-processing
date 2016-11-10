@@ -21,9 +21,14 @@ public:
     /**
      * Creates a new layout of nrows rows by ncols columns for window.
      */
-    GridLayout(WINDOW *window, int nrows, int ncols);
+    GridLayout(WINDOW *window = stdscr, int nrows = 1, int ncols = 1);
 
     ~GridLayout();
+
+    /**
+     * Sets the layout properties
+     */
+    void setProperties(WINDOW *window, int nrows, int ncols);
 
     /**
      * Adds a new element to the layout.

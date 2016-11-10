@@ -1,6 +1,14 @@
 #include "ui/GridLayout.h"
 
 GridLayout::GridLayout(WINDOW *window, int nrows, int ncols) {
+    setProperties(window, nrows, ncols);
+}
+
+GridLayout::~GridLayout() {
+    clear();
+}
+
+void GridLayout::setProperties(WINDOW *window, int nrows, int ncols) {
     int y, x;
 
     // get window size
@@ -11,30 +19,22 @@ GridLayout::GridLayout(WINDOW *window, int nrows, int ncols) {
     col_width  = (double)x / ncols;
 }
 
-GridLayout::~GridLayout() {
-    clear();
-}
-
 void GridLayout::add(int nrows, int ncols, int start_row, int start_col) {
     Element *element;
-    int begin_y, begin_x;
     int max_y, max_x;
 
     element = new Element();
 
-    begin_y = start_row * row_height;
-    begin_x = start_col * col_width;
+    // set position
+    element->y = start_row * row_height;
+    element->x = start_col * col_width;
 
     max_y = (start_row + nrows) * row_height;
     max_x = (start_col + ncols) * col_width;
 
     // set dimenstions
-    element->height = max_y - begin_y;
-    element->width = max_x - begin_x;
-
-    // set position
-    element->y = begin_y;
-    element->x = begin_x;
+    element->height = max_y - element->y;
+    element->width = max_x - element->x;
 
     // save element
     elements.push_back(element);
