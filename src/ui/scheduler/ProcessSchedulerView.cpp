@@ -6,28 +6,16 @@
 ProcessSchedulerView::ProcessSchedulerView(ProcessScheduler *scheduler) {
     this->scheduler = scheduler;
 
-    // counters
-    new_processes_counter = new Counter(content, "Procesos nuevos: ", 0, 0);
-    total_time_counter = new Counter(content, "Tiempo total: ", 1, 0);
-
-    // create window for panels; skip two rows for counters
-    panels_win = derwin(content, CONTENT_LINES - 2, COLS, 2, 0);
-    syncok(panels_win, TRUE);
+    initPanels();
 
     pcb_table = new PCBTable(content);
-
-    initPanels();
 }
 
 ProcessSchedulerView::~ProcessSchedulerView() {
-    delete(new_processes_counter);
-    delete(total_time_counter);
-
     delete(ready_panel);
     delete(blocked_panel);
     delete(process_panel);
     delete(terminated_panel);
-
     delete(pcb_table);
 
     delwin(panels_win);
@@ -37,11 +25,9 @@ ProcessSchedulerView::~ProcessSchedulerView() {
  * Writes all elements to screen.
  */
 void ProcessSchedulerView::postPanels() {
-    // show counters
-    new_processes_counter->post();
-    total_time_counter->post();
+    wclear(content);
 
-    // show panels
+    summary.post();
     ready_panel->post();
     blocked_panel->post();
     process_panel->post();
@@ -59,8 +45,9 @@ void ProcessSchedulerView::postTable() {
  * Updates panels with the current data.
  */
 void ProcessSchedulerView::update() {
-    new_processes_counter->setValue(scheduler->new_processes.size());
-    total_time_counter->setValue(scheduler->global_time);
+    summary.setNewProcesses(scheduler->new_processes.size());
+    summary.setGlobalTime(scheduler->global_time);
+    summary.setQuantum(scheduler->quantum);
 
     process_panel->display(scheduler->running_process);
     ready_panel->setData(scheduler->ready_processes);
@@ -73,7 +60,13 @@ void ProcessSchedulerView::update() {
 }
 
 void ProcessSchedulerView::initPanels() {
-    GridLayout grid(panels_win, 2, 4); // 2x4 layout over panels_win
+    GridLayout grid;
+
+    panels_win = derwin(content, CONTENT_LINES - 2, COLS, 2, 0);
+
+    syncok(panels_win, TRUE);
+
+    grid.setProperties(panels_win, 2, 4);
 
     grid.add(1, 1, 0, 0); // ready panel
     grid.add(1, 1, 0, 1); // blocked panel

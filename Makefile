@@ -4,7 +4,7 @@ OBJS = src/*.cpp src/ui/*.cpp src/ui/scheduler/*.cpp
 
 INCLUDE_PATHS = -Iinclude
 
-LINKER_FLAGS = -lncurses
+LINKER_FLAGS = -lncurses -lform
 
 COMPILER_FLAGS = -std=c++11 -Wall
 
