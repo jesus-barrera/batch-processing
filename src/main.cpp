@@ -54,7 +54,7 @@ void initialize() {
     startScreen();
     keypad(content, TRUE);
 
-    setHeader("PROCESAMIENTO POR LOTES");
+    setHeader("First Come First Serve (FCFS)");
 
     scheduler = new ProcessScheduler();
 }
