@@ -1,4 +1,4 @@
-# First Come First Served (FCFS) Shedululing Algorithm
+# Round Robin Algorithm
 
 ## Requirements
 

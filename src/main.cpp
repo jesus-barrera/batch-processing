@@ -59,7 +59,7 @@ void initialize() {
     startScreen();
     keypad(content, TRUE);
 
-    setHeader("PROCESAMIENTO POR LOTES");
+    setHeader("ROUND ROBIN");
 
     scheduler = new ProcessScheduler();
 }
