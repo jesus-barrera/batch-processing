@@ -26,7 +26,7 @@ public:
     void clear();
     void clearField(int index);
 
-    void setProgramNumber(unsigned int program_number);
+    void setProgramNumber(unsigned int pid);
     void setProgrammerName(std::string &name);
     void setOperation(short int operation, int left_operand, int right_operand);
     void setEstimatedTime(unsigned int estimated_time);

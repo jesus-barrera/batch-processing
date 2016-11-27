@@ -23,7 +23,7 @@ void BlockedProcessesPanel::printRow(Process *process) {
     wprintw(
         data_win,
         "%-2lu | %-3lu",
-        process->program_number,
+        process->pid,
         process->blocked_time
     );
 }

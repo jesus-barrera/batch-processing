@@ -53,13 +53,13 @@ void pause(std::string message) {
 void initialize() {
     srand(time(NULL));
 
+    // initialize ncurses
     initscr();
     cbreak();
 
     startScreen();
-    keypad(content, TRUE);
-
-    setHeader("ROUND ROBIN");
+    
+    setHeader("PAGINACION SIMPLE");
 
     scheduler = new ProcessScheduler();
 }

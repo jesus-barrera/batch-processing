@@ -28,7 +28,7 @@ public:
 
     short termination_status;
     int state;
-    unsigned int program_number;
+    unsigned int pid;
     string programmer_name;
     short operation;
     int left_operand;
@@ -46,6 +46,7 @@ public:
     int turnaround_time;
     int waiting_time;
     int response_time;
+    unsigned int size;
 
     static short getOperation(const char* operator_str);
     static Process *newRandom();

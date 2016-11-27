@@ -48,10 +48,10 @@ Process *Process::newRandom() {
 
     process = new Process();
 
-    process->program_number = ++count;
+    process->pid = ++count;
 
     // generate programmer's name
-    name << "Programa " << process->program_number;
+    name << "Programa " << process->pid;
     process->programmer_name = name.str();
 
     // set operation and operands
@@ -69,6 +69,7 @@ Process *Process::newRandom() {
 
     // set other data
     process->estimated_time = random(3, 15);
+    process->size = random(1, 24);
 
     return process;
 }

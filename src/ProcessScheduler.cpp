@@ -5,11 +5,12 @@
 #include "ui/screen.h"
 
 const string ProcessScheduler::HELP =
-    "e: interrupcion | " \
-    "w: error | " \
-    "p: pausa | " \
-    "u: nuevo proceso | " \
-    "b: ver BCPs";
+    "e:interrupcion | " \
+    "w:error | " \
+    "p:pausa | " \
+    "u:crear proceso | " \
+    "b:BCPs | " \
+    "t:paginas";
 
 ProcessScheduler::ProcessScheduler() {
     num_of_processes = 0;
@@ -83,6 +84,9 @@ void ProcessScheduler::runSimulation() {
     endSimulation();
 }
 
+/**
+ * Shows terminated processes information.
+ */
 void ProcessScheduler::showResults() {
     view->postTable();
 }
@@ -111,12 +115,11 @@ void ProcessScheduler::update() {
 int ProcessScheduler::load() {
     Process *process;
     int loaded;
-    int max;
 
-    max = MAX_ACTIVE_PROCESSES - getTotalActiveProcesses();
+    loaded = 0;
 
-    for (loaded = 0; loaded < max && new_processes.size() > 0; loaded++) {
-        process = new_processes.front();
+    while (new_processes.size() > 0 &&
+           memory.loadProcess(process = new_processes.front())) {
 
         process->state = Process::READY;
         process->arrival_time = global_time;
@@ -125,6 +128,8 @@ int ProcessScheduler::load() {
 
         ready_processes.push_back(process);
         new_processes.pop_front();
+
+        loaded++;
     }
 
     return loaded;
@@ -221,6 +226,7 @@ void ProcessScheduler::terminate(short reason) {
     process->state = Process::TERMINATED;
 
     terminated_processes.push_back(process);
+    memory.removeProcess(process->pid);
 }
 
 void ProcessScheduler::suspend() {
@@ -253,6 +259,9 @@ void ProcessScheduler::handleKey(int key) {
         case 'b': case 'B':
             showBCPTable();
             break;
+
+        case 't': case 'T':
+            showPageTable();
 
         default:
             break;
@@ -296,4 +305,10 @@ void ProcessScheduler::showBCPTable() {
     view->postTable();
     pause();
     view->postPanels();
+}
+
+void ProcessScheduler::showPageTable() {
+    // view->postPageTable();
+    // pause();
+    // view->postPanels();
 }

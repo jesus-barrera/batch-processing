@@ -26,7 +26,7 @@ void ProcessPanel::post() {
 void ProcessPanel::display(Process *process) {
     if (process != NULL) {
         setProgrammerName(process->programmer_name);
-        setProgramNumber(process->program_number);
+        setProgramNumber(process->pid);
         setOperation(process->operation, process->left_operand, process->right_operand);
         setEstimatedTime(process->estimated_time);
         setElapsedTime(process->service_time);
@@ -56,8 +56,8 @@ void ProcessPanel::clearField(int index) {
 
 /* *** The following methods are used to set a field's value. *** */
 
-void ProcessPanel::setProgramNumber(unsigned int program_number) {
-    setField(PROGRAM_NUMBER_FIELD, "%lu", program_number);
+void ProcessPanel::setProgramNumber(unsigned int pid) {
+    setField(PROGRAM_NUMBER_FIELD, "%lu", pid);
 }
 
 void ProcessPanel::setProgrammerName(std::string &name) {

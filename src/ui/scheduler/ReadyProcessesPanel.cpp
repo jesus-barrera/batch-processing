@@ -24,7 +24,7 @@ void ReadyProcessesPanel::printRow(Process *process) {
     wprintw(
         data_win,
         "%-2lu | %-2lu | %-2lu",
-        process->program_number,
+        process->pid,
         process->estimated_time,
         process->getTimeLeft()
     );

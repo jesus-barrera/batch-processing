@@ -38,7 +38,7 @@ void PCBTable::post() {
 void PCBTable::printRow(Process *process) {
     stringstream row;
 
-    row << setw(3) << process->program_number << SEPARATOR
+    row << setw(3) << process->pid << SEPARATOR
         << setw(3) << str_states[process->state] << SEPARATOR
         << formatTime(process->arrival_time, 3) << SEPARATOR
         << formatTime(process->termination_time, 3) << SEPARATOR
