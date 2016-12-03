@@ -7,7 +7,7 @@
 using namespace std;
 
 class Process;
-class ProcessScheduler;
+class MemoryView;
 
 class MemoryManager {
 public:
@@ -26,7 +26,7 @@ public:
     void removeProcess(unsigned int pid);
     unsigned int getFreeSpace();
 
-    friend ProcessScheduler;
+    friend MemoryView;
 
 private:
     TableMap tables;
