@@ -6,6 +6,7 @@
 #include "FinishedProcessesPanel.h"
 #include "ReadyProcessesPanel.h"
 #include "ProcessPanel.h"
+#include "MemoryPanel.h"
 #include "PCBTable.h"
 
 class ProcessScheduler;
@@ -17,6 +18,7 @@ public:
         BLOCKED_PANEL,
         PROCESS_PANEL,
         TERMINATED_PANEL,
+        MEMORY_PANEL,
         NUM_PANELS
     };
 
@@ -25,21 +27,27 @@ public:
     ProcessSchedulerView(ProcessScheduler *scheduler);
     ~ProcessSchedulerView();
 
-    void postPanels();
-    void postTable();
+    void displayPanels();
+    void displayPCBs();
+    void displayPageTables();
 
     void update();
 
 private:
+    // view elements
     SummaryDisplay summary;
-    PCBTable *pcb_table;
+
+    // main panels
+    WINDOW *panels_win;
 
     ReadyProcessesPanel *ready_panel;
     ProcessPanel *process_panel;
     BlockedProcessesPanel *blocked_panel;
     FinishedProcessesPanel *terminated_panel;
+    MemoryPanel *memory_panel;
 
-    WINDOW *panels_win;
+    // secondary views
+    PCBTable *pcb_table;
 
     void initPanels();
 };

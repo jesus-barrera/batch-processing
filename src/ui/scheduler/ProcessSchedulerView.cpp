@@ -16,15 +16,15 @@ ProcessSchedulerView::~ProcessSchedulerView() {
     delete(blocked_panel);
     delete(process_panel);
     delete(terminated_panel);
+    delete(memory_panel);
     delete(pcb_table);
-
     delwin(panels_win);
 }
 
 /**
  * Writes all elements to screen.
  */
-void ProcessSchedulerView::postPanels() {
+void ProcessSchedulerView::displayPanels() {
     wclear(content);
 
     summary.post();
@@ -32,13 +32,18 @@ void ProcessSchedulerView::postPanels() {
     blocked_panel->post();
     process_panel->post();
     terminated_panel->post();
+    memory_panel->post();
 
     update();
 }
 
-void ProcessSchedulerView::postTable() {
+void ProcessSchedulerView::displayPCBs() {
     pcb_table->post();
     pcb_table->setData(scheduler->pcb_table);
+}
+
+void ProcessSchedulerView::displayPageTables() {
+    //
 }
 
 /**
@@ -53,6 +58,7 @@ void ProcessSchedulerView::update() {
     ready_panel->setData(scheduler->ready_processes);
     blocked_panel->setData(scheduler->blocked_processes);
     terminated_panel->setData(scheduler->terminated_processes);
+    memory_panel->setData(scheduler->memory, scheduler->pcb_table);
 
     if (scheduler->running_process) {
         process_panel->setQuantum(scheduler->cpu_time);
@@ -66,12 +72,13 @@ void ProcessSchedulerView::initPanels() {
 
     syncok(panels_win, TRUE);
 
-    grid.setProperties(panels_win, 2, 4);
+    grid.setProperties(panels_win, 2, 6);
 
     grid.add(1, 1, 0, 0); // ready panel
     grid.add(1, 1, 0, 1); // blocked panel
     grid.add(1, 2, 1, 0); // process panel
     grid.add(2, 2, 0, 2); // terminated panel
+    grid.add(2, 2, 0, 4); // memory panel
 
     ready_panel = new ReadyProcessesPanel(
         panels_win,
@@ -103,5 +110,13 @@ void ProcessSchedulerView::initPanels() {
         grid[TERMINATED_PANEL].width,
         grid[TERMINATED_PANEL].y,
         grid[TERMINATED_PANEL].x
+    );
+
+    memory_panel = new MemoryPanel(
+        panels_win,
+        grid[MEMORY_PANEL].height,
+        grid[MEMORY_PANEL].width,
+        grid[MEMORY_PANEL].y,
+        grid[MEMORY_PANEL].x
     );
 }

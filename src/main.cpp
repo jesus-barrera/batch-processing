@@ -2,6 +2,7 @@
 #include <ctime>
 
 #include "ui/screen.h"
+#include "ui/scheduler/MemoryView.h"
 #include "ProcessScheduler.h"
 #include "util.h"
 
@@ -56,9 +57,11 @@ void initialize() {
     // initialize ncurses
     initscr();
     cbreak();
+    start_color();
 
+    MemoryView::init();
     startScreen();
-    
+
     setHeader("PAGINACION SIMPLE");
 
     scheduler = new ProcessScheduler();

@@ -87,7 +87,7 @@ private:
     void enterPause();
     void leavePause();
     void showBCPTable();
-    void showPageTable();
+    void showPageTables();
 };
 
 #endif

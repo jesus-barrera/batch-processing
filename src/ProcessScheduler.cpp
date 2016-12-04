@@ -37,7 +37,7 @@ void ProcessScheduler::setQuantum(int quantum) {
  * Writes all elements to screen.
  */
 void ProcessScheduler::post() {
-    view->postPanels();
+    view->displayPanels();
 }
 
 /**
@@ -88,7 +88,7 @@ void ProcessScheduler::runSimulation() {
  * Shows terminated processes information.
  */
 void ProcessScheduler::showResults() {
-    view->postTable();
+    view->displayPCBs();
 }
 
 void ProcessScheduler::initSimulation() {
@@ -261,7 +261,7 @@ void ProcessScheduler::handleKey(int key) {
             break;
 
         case 't': case 'T':
-            showPageTable();
+            showPageTables();
 
         default:
             break;
@@ -302,13 +302,13 @@ void ProcessScheduler::leavePause() {
 }
 
 void ProcessScheduler::showBCPTable() {
-    view->postTable();
+    view->displayPCBs();
     pause();
-    view->postPanels();
+    view->displayPanels();
 }
 
-void ProcessScheduler::showPageTable() {
-    // view->postPageTable();
-    // pause();
-    // view->postPanels();
+void ProcessScheduler::showPageTables() {
+    view->displayPageTables();
+    pause();
+    view->displayPanels();
 }
