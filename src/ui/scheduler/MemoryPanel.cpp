@@ -13,3 +13,8 @@ void MemoryPanel::post() {
     Panel::post();
     MemoryView::post();
 }
+
+void MemoryPanel::unpost() {
+    MemoryView::unpost();
+    Panel::unpost();
+}

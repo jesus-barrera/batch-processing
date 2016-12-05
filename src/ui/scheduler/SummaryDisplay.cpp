@@ -51,6 +51,10 @@ void SummaryDisplay::post() {
     post_form(form);
 }
 
+void SummaryDisplay::unpost() {
+    unpost_form(form);
+}
+
 void SummaryDisplay::setFieldValue(int index, int value) {
     char *buffer = field_buffer(fields[index], 0);
 

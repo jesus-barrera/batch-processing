@@ -54,6 +54,7 @@ private:
 
     void initWindows();
     void initPanels();
+    void unpostPanels();
     void updateSummary();
     void updatePanels();
 };

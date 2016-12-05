@@ -36,6 +36,7 @@ public:
     void setData(MemoryManager &memory, ProcessList &pcb);
 
     void post();
+    void unpost();
 
 private:
     static map<int, int> color_pairs;

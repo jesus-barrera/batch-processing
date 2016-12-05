@@ -14,6 +14,7 @@ public:
     ~MemoryPanel();
 
     void post();
+    void unpost();
 };
 
 #endif

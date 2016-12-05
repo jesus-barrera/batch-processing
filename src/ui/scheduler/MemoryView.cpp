@@ -58,6 +58,9 @@ void MemoryView::post() {
     post_form(form);
 }
 
+void MemoryView::unpost() {
+    unpost_form(form);
+}
 
 void MemoryView::setWindow(WINDOW *window) {
     this->window = window;

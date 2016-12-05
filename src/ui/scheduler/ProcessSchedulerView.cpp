@@ -45,12 +45,14 @@ void ProcessSchedulerView::displayPanels() {
 }
 
 void ProcessSchedulerView::displayPCBs() {
+    unpostPanels();
+
     pcb_table->post();
     pcb_table->setData(scheduler->pcb_table);
 }
 
 void ProcessSchedulerView::displayPageTables() {
-    wclear(content);
+    unpostPanels();
 
     page_table->setData(scheduler->memory);
 }
@@ -121,6 +123,15 @@ void ProcessSchedulerView::initPanels() {
         grid[MEMORY_PANEL].y,
         grid[MEMORY_PANEL].x
     );
+}
+
+void ProcessSchedulerView::unpostPanels() {
+    summary->unpost();
+    ready_panel->unpost();
+    blocked_panel->unpost();
+    process_panel->unpost();
+    terminated_panel->unpost();
+    memory_panel->unpost();
 }
 
 void ProcessSchedulerView::updateSummary() {

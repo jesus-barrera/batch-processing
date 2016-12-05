@@ -22,6 +22,7 @@ public:
     void setNextProcess(Process *process);
 
     void post();
+    void unpost();
 
 private:
     enum {
