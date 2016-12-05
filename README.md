@@ -1,4 +1,4 @@
-# Round Robin Algorithm
+# Paging
 
 ## Requirements
 
