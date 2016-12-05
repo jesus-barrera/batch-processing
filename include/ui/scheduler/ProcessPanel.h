@@ -9,6 +9,7 @@ public:
     enum {
         PROGRAM_NUMBER_FIELD,
         PROGRAMMER_NAME_FIELD,
+        SIZE_FIELD,
         OPERATION_FIELD,
         ESTIMATED_TIME_FIELD,
         ELAPSED_TIME_FIELD,
@@ -33,6 +34,7 @@ public:
     void setElapsedTime(unsigned int elapsed_time);
     void setTimeLeft(unsigned int time_left);
     void setQuantum(unsigned int time_left);
+    void setSize(unsigned int size);
 
 private:
     void printLabels();
