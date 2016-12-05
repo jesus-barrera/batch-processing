@@ -8,6 +8,7 @@
 #include "ProcessPanel.h"
 #include "MemoryPanel.h"
 #include "PCBTable.h"
+#include "PageTableView.h"
 
 class ProcessScheduler;
 
@@ -49,6 +50,7 @@ private:
 
     // secondary views
     PCBTable *pcb_table;
+    PageTableView *page_table;
 
     void initWindows();
     void initPanels();

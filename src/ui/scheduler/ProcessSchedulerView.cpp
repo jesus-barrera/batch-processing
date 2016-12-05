@@ -10,7 +10,10 @@ ProcessSchedulerView::ProcessSchedulerView(ProcessScheduler *scheduler) {
     initPanels();
 
     summary = new SummaryDisplay(summary_window);
+
+    // secondary views
     pcb_table = new PCBTable(content);
+    page_table = new PageTableView(content);
 }
 
 ProcessSchedulerView::~ProcessSchedulerView() {
@@ -20,6 +23,7 @@ ProcessSchedulerView::~ProcessSchedulerView() {
     delete(terminated_panel);
     delete(memory_panel);
     delete(pcb_table);
+    delete(page_table);
     delwin(summary_window);
     delwin(panels_window);
 }
@@ -46,7 +50,9 @@ void ProcessSchedulerView::displayPCBs() {
 }
 
 void ProcessSchedulerView::displayPageTables() {
-    //
+    wclear(content);
+
+    page_table->setData(scheduler->memory);
 }
 
 /**

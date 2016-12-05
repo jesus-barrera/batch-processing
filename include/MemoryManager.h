@@ -8,6 +8,7 @@ using namespace std;
 
 class Process;
 class MemoryView;
+class PageTableView;
 
 class MemoryManager {
 public:
@@ -27,6 +28,7 @@ public:
     unsigned int getFreeSpace();
 
     friend MemoryView;
+    friend PageTableView;
 
 private:
     TableMap tables;
