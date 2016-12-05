@@ -1,52 +1,28 @@
 #include "ui/scheduler/SummaryDisplay.h"
 #include "ui/screen.h"
+#include "Process.h"
 
-const std::string SummaryDisplay::labels[] = {
+const std::string SummaryDisplay::labels[NUM_OF_FIELDS] = {
     "Quantum: ",
     "Procesos nuevos: ",
-    "Tiempo Global: "
+    "Tiempo Global: ",
+    "Sig. PID: ",
+    "Sig. Tam: "
 };
 
-SummaryDisplay::SummaryDisplay() {
-    int startx;
+SummaryDisplay::SummaryDisplay(WINDOW *window) {
+    this->window = window;
 
-    subwin = derwin(content, 2, COLS, 0, 0);
-
-    startx = 0;
-
-    for (int i = 0; i < NUM_OF_FIELDS; i++, startx += 5) {
-        startx += labels[i].size();
-
-        fields[i] = new_field(1, 5, 0, startx, 0, 0);
-
-        set_field_back(fields[i], A_BOLD);
-    }
-
-    fields[NUM_OF_FIELDS] = NULL;
-
-    form = new_form(fields);
-    set_form_sub(form, subwin);
+    initFields();
+    initForm();
 }
 
 SummaryDisplay::~SummaryDisplay() {
     free_form(form);
 
-    for (int i = 0; i < NUM_OF_FIELDS; i++) {
-        free_field(fields[i]);
-
-        fields[i] = NULL;
+    for (FIELD *field: fields) {
+        free_field(field);
     }
-
-    delwin(subwin);
-}
-
-void SummaryDisplay::post() {
-    post_form(form);
-    postLabels();
-}
-
-void SummaryDisplay::unpost() {
-    unpost_form(form);
 }
 
 void SummaryDisplay::setQuantum(int quantum) {
@@ -61,6 +37,20 @@ void SummaryDisplay::setGlobalTime(int gtime) {
     setFieldValue(GLOBAL_TIME_FIELD, gtime);
 }
 
+void SummaryDisplay::setNextProcess(Process *process) {
+    if (process) {
+        setFieldValue(NEXT_PROCESS_PID_FIELD, process->pid);
+        setFieldValue(NEXT_PROCESS_SIZE_FIELD, process->size);
+    } else {
+        clearField(NEXT_PROCESS_PID_FIELD);
+        clearField(NEXT_PROCESS_SIZE_FIELD);
+    }
+}
+
+void SummaryDisplay::post() {
+    post_form(form);
+}
+
 void SummaryDisplay::setFieldValue(int index, int value) {
     char *buffer = field_buffer(fields[index], 0);
 
@@ -69,10 +59,49 @@ void SummaryDisplay::setFieldValue(int index, int value) {
     set_field_buffer(fields[index], 0, buffer);
 }
 
-void SummaryDisplay::postLabels() {
-    for (int i = 0, startx = 0; i < NUM_OF_FIELDS; i++) {
-        mvwprintw(subwin, 0, startx, labels[i].c_str());
+void SummaryDisplay::clearField(int index) {
+    set_field_buffer(fields[index], 0, "");
+}
 
-        startx += labels[i].size() + 5;
+void SummaryDisplay::initFields() {
+    int row, col, label_size;
+
+    row = 0;
+    col = 0;
+
+    for (int i = 0; i < NUM_OF_FIELDS; i++) {
+        label_size = labels[i].size();
+
+        fields[i + NUM_OF_FIELDS] = newLabel(row, col, labels[i]);
+        fields[i] = newField(row, col + label_size);
+
+        col += FIELD_WIDTH + label_size;
     }
+
+    fields.back() = nullptr;
+}
+
+void SummaryDisplay::initForm() {
+    form = new_form(fields.data());
+    set_form_sub(form, window);
+}
+
+FIELD *SummaryDisplay::newField(int row, int col) {
+    FIELD *field;
+
+    field = new_field(1, FIELD_WIDTH, row, col, 0, 0);
+
+    set_field_fore(field, A_BOLD);
+
+    return field;
+}
+
+FIELD *SummaryDisplay::newLabel(int row, int col, const string &text) {
+    FIELD *label;
+
+    label = new_field(1, text.size(), row, col, 0, 0);
+
+    set_field_buffer(label, 0, text.c_str());
+
+    return label;
 }

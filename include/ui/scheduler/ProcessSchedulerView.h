@@ -35,11 +35,12 @@ public:
 
 private:
     // view elements
-    SummaryDisplay summary;
+    SummaryDisplay *summary;
+
+    // subwindows
+    WINDOW *panels_window, *summary_window;
 
     // main panels
-    WINDOW *panels_win;
-
     ReadyProcessesPanel *ready_panel;
     ProcessPanel *process_panel;
     BlockedProcessesPanel *blocked_panel;
@@ -49,7 +50,10 @@ private:
     // secondary views
     PCBTable *pcb_table;
 
+    void initWindows();
     void initPanels();
+    void updateSummary();
+    void updatePanels();
 };
 
 #endif

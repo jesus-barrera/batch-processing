@@ -1,38 +1,55 @@
 #ifndef _SUMMARY_DISPLAY_INCLUDED_
 #define _SUMMARY_DISPLAY_INCLUDED_
 
+#include <string>
+#include <array>
+
 #include <ncurses.h>
 #include <form.h>
-#include <string>
+
+class Process;
+
+using namespace std;
 
 class SummaryDisplay {
 public:
-    SummaryDisplay();
+    SummaryDisplay(WINDOW *window = stdscr);
     ~SummaryDisplay();
-
-    void post();
-    void unpost();
 
     void setQuantum(int quantum);
     void setNewProcesses(int num);
     void setGlobalTime(int gtime);
+    void setNextProcess(Process *process);
+
+    void post();
 
 private:
     enum {
         QUANTUM_FIELD,
         NEW_PROCESSES_FIELD,
         GLOBAL_TIME_FIELD,
+        NEXT_PROCESS_PID_FIELD,
+        NEXT_PROCESS_SIZE_FIELD,
         NUM_OF_FIELDS
     };
 
-    static const std::string labels[];
+    static const int FIELD_WIDTH = 5;
 
-    WINDOW *subwin;
+    static const string labels[NUM_OF_FIELDS];
+
+    WINDOW *window;
     FORM *form;
-    FIELD *fields[NUM_OF_FIELDS + 1]; // NULL terminated array
+
+    // we place labels in form fields, so an extra field for each actual field is
+    // required, also the array must be null terminated, thus the + 1.
+    array<FIELD *, NUM_OF_FIELDS * 2 + 1> fields;
 
     void setFieldValue(int index, int value);
-    void postLabels();
+    void clearField(int index);
+    void initFields();
+    void initForm();
+    FIELD *newField(int row, int col);
+    FIELD *newLabel(int row, int col, const string &text);
 };
 
 #endif
