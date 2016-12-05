@@ -22,7 +22,7 @@ public:
     enum { SUCCESS, ERROR };
 
     // process state
-    enum { NEW, READY, RUNNING, BLOCKED, TERMINATED };
+    enum { NEW, READY, RUNNING, BLOCKED, SUSPENDED, TERMINATED };
 
     static const char *operators[];
 

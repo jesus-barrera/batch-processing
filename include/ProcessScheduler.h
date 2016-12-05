@@ -16,7 +16,8 @@ public:
     static const int MAX_BLOCKED_TIME = 8;
     static const int GETCH_TIMEOUT = 500;
 
-    static const string HELP;
+    static const char *SUSPENDED_FILE_NAME;
+    static const char *HELP;
 
     ProcessScheduler();
     ~ProcessScheduler();
@@ -55,6 +56,7 @@ private:
     ProcessList ready_processes;
     ProcessList blocked_processes;
     ProcessList terminated_processes;
+    ProcessList suspended_processes;
     ProcessList pcb_table;
 
     Process *running_process;
@@ -81,8 +83,11 @@ private:
     void updateBlockedProcesses();
     void terminate(short reason);
     void handleKey(int key);
-    void suspend();
+    void block();
     void interrupt();
+    void suspend();
+    void reload();
+    void saveFile();
     void pause();
     void enterPause();
     void leavePause();

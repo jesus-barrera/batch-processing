@@ -8,7 +8,7 @@ using namespace std;
 const string PCBTable::SEPARATOR = " | ";
 
 const char PCBTable::str_states[] = {
-    'N', 'L', 'E', 'B', 'T'
+    'N', 'L', 'E', 'B', 'S', 'T'
 };
 
 PCBTable::PCBTable(WINDOW *window)

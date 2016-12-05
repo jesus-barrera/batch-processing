@@ -1,16 +1,21 @@
 #include <sstream>
+#include <fstream>
 
 #include "ProcessScheduler.h"
 #include "ui/scheduler/ProcessSchedulerView.h"
 #include "ui/screen.h"
 
-const string ProcessScheduler::HELP =
+const char *ProcessScheduler::SUSPENDED_FILE_NAME = "suspendidos.txt";
+
+const char *ProcessScheduler::HELP =
     "e: interrupcion | " \
     "w: error | " \
     "p: pausa | " \
     "u: crear proceso | " \
     "b: ver BCPs | " \
-    "t: ver paginas";
+    "t: ver paginas | " \
+    "s: suspendido | " \
+    "r: recargar";
 
 ProcessScheduler::ProcessScheduler() {
     num_of_processes = 0;
@@ -22,11 +27,11 @@ ProcessScheduler::ProcessScheduler() {
 ProcessScheduler::~ProcessScheduler() {
     delete(view);
 
-    while (!pcb_table.empty()) {
-        delete(pcb_table.back());
-
-        pcb_table.pop_back();
+    for (Process *process: pcb_table) {
+        delete(process);
     }
+
+    pcb_table.clear();
 }
 
 void ProcessScheduler::setQuantum(int quantum) {
@@ -113,12 +118,12 @@ void ProcessScheduler::update() {
  * loaded processes.
  */
 int ProcessScheduler::load() {
-    Process *process;
     int loaded;
+    Process *process;
 
     loaded = 0;
 
-    while (new_processes.size() > 0 &&
+    while (!new_processes.empty() &&
            memory.loadProcess(process = new_processes.front())) {
 
         process->state = Process::READY;
@@ -175,7 +180,7 @@ void ProcessScheduler::updateRunningProcess() {
         if (running_process->service_time >= running_process->estimated_time) {
             terminate(Process::SUCCESS);
         } else if (cpu_time >= quantum) {
-            suspend();
+            interrupt();
         }
     }
 }
@@ -229,19 +234,13 @@ void ProcessScheduler::terminate(short reason) {
     memory.removeProcess(process->pid);
 }
 
-void ProcessScheduler::suspend() {
-    ready_processes.push_back(running_process);
-    running_process->state = Process::READY;
-    running_process = NULL;
-}
-
 /**
  * Handles a key press for a runnig process.
  */
 void ProcessScheduler::handleKey(int key) {
     switch (key) {
         case 'e': case 'E':
-            if (running_process) interrupt();
+            if (running_process) block();
             break;
 
         case 'w': case 'W':
@@ -262,18 +261,77 @@ void ProcessScheduler::handleKey(int key) {
 
         case 't': case 'T':
             showPageTables();
+            break;
+
+        case 's': case 'S':
+            suspend();
+            break;
+
+        case 'r': case 'R':
+            reload();
+            break;
 
         default:
             break;
     }
 }
 
-void ProcessScheduler::interrupt() {
+void ProcessScheduler::block() {
     running_process->blocked_time = 0;
     running_process->state = Process::BLOCKED;
 
     blocked_processes.push_back(running_process);
     running_process = NULL;
+}
+
+void ProcessScheduler::interrupt() {
+    ready_processes.push_back(running_process);
+    running_process->state = Process::READY;
+    running_process = NULL;
+}
+
+void ProcessScheduler::suspend() {
+    Process *process;
+
+    if (!blocked_processes.empty()) {
+        // remove process
+        process = blocked_processes.front();
+        blocked_processes.pop_front();
+
+        memory.removeProcess(process->pid);
+
+        // suspend
+        process->state = Process::SUSPENDED;
+        suspended_processes.push_back(process);
+
+        saveFile();
+    }
+}
+
+void ProcessScheduler::reload() {
+    Process *process;
+
+    if (!suspended_processes.empty() &&
+        memory.loadProcess(process = suspended_processes.front())) {
+
+        suspended_processes.pop_front();
+
+        // blocking
+        process->state = Process::BLOCKED;
+        blocked_processes.push_back(process);
+
+        saveFile();
+    }
+}
+
+void ProcessScheduler::saveFile() {
+    ofstream file(SUSPENDED_FILE_NAME, ios_base::out);
+
+    for (Process *process: suspended_processes) {
+        file << "P" << process->pid << endl;
+    }
+
+    file.close();
 }
 
 /**
