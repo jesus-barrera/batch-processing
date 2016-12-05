@@ -3,9 +3,12 @@
 #include "Process.h"
 
 const std::string SummaryDisplay::labels[NUM_OF_FIELDS] = {
-    "Quantum: ",
-    "Procesos nuevos: ",
     "Tiempo Global: ",
+    "Quantum: ",
+    "Nuevos: ",
+    "Sig. PID: ",
+    "Sig. Tam: ",
+    "Suspendidos: ",
     "Sig. PID: ",
     "Sig. Tam: "
 };
@@ -29,21 +32,35 @@ void SummaryDisplay::setQuantum(int quantum) {
     setFieldValue(QUANTUM_FIELD, quantum);
 }
 
-void SummaryDisplay::setNewProcesses(int num) {
-    setFieldValue(NEW_PROCESSES_FIELD, num);
+void SummaryDisplay::setNewCount(int num) {
+    setFieldValue(NEW_COUNT_FIELD, num);
+}
+
+void SummaryDisplay::setSuspendedCount(int num) {
+    setFieldValue(SUSPENDED_COUNT_FIELD, num);
 }
 
 void SummaryDisplay::setGlobalTime(int gtime) {
     setFieldValue(GLOBAL_TIME_FIELD, gtime);
 }
 
-void SummaryDisplay::setNextProcess(Process *process) {
+void SummaryDisplay::setNewProcess(Process *process) {
     if (process) {
-        setFieldValue(NEXT_PROCESS_PID_FIELD, process->pid);
-        setFieldValue(NEXT_PROCESS_SIZE_FIELD, process->size);
+        setFieldValue(NEW_PROCESS_PID_FIELD, process->pid);
+        setFieldValue(NEW_PROCESS_SIZE_FIELD, process->size);
     } else {
-        clearField(NEXT_PROCESS_PID_FIELD);
-        clearField(NEXT_PROCESS_SIZE_FIELD);
+        clearField(NEW_PROCESS_PID_FIELD);
+        clearField(NEW_PROCESS_SIZE_FIELD);
+    }
+}
+
+void SummaryDisplay::setSuspendedProcess(Process *process) {
+    if (process) {
+        setFieldValue(SUSPENDED_PROCESS_PID_FIELD, process->pid);
+        setFieldValue(SUSPENDED_PROCESS_SIZE_FIELD, process->size);
+    } else {
+        clearField(SUSPENDED_PROCESS_PID_FIELD);
+        clearField(SUSPENDED_PROCESS_SIZE_FIELD);
     }
 }
 

@@ -135,18 +135,25 @@ void ProcessSchedulerView::unpostPanels() {
 }
 
 void ProcessSchedulerView::updateSummary() {
-    Process *next_process;
+    Process *next_new, *next_suspended;
 
-    if (scheduler->new_processes.empty()) {
-        next_process = nullptr;
-    } else {
-        next_process = scheduler->new_processes.front();
-    }
+    next_new = nextProcess(scheduler->new_processes);
+    next_suspended = nextProcess(scheduler->suspended_processes);
 
-    summary->setNewProcesses(scheduler->new_processes.size());
+    summary->setNewCount(scheduler->new_processes.size());
+    summary->setSuspendedCount(scheduler->suspended_processes.size());
     summary->setGlobalTime(scheduler->global_time);
     summary->setQuantum(scheduler->quantum);
-    summary->setNextProcess(next_process);
+    summary->setNewProcess(next_new);
+    summary->setSuspendedProcess(next_suspended);
+}
+
+Process *ProcessSchedulerView::nextProcess(ProcessList &processes) {
+    if (processes.empty()) {
+        return nullptr;
+    } else {
+        return processes.front();
+    }
 }
 
 void ProcessSchedulerView::updatePanels() {

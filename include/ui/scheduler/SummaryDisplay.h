@@ -17,24 +17,29 @@ public:
     ~SummaryDisplay();
 
     void setQuantum(int quantum);
-    void setNewProcesses(int num);
+    void setNewCount(int num);
+    void setSuspendedCount(int num);
     void setGlobalTime(int gtime);
-    void setNextProcess(Process *process);
+    void setNewProcess(Process *process);
+    void setSuspendedProcess(Process *process);
 
     void post();
     void unpost();
 
 private:
     enum {
-        QUANTUM_FIELD,
-        NEW_PROCESSES_FIELD,
         GLOBAL_TIME_FIELD,
-        NEXT_PROCESS_PID_FIELD,
-        NEXT_PROCESS_SIZE_FIELD,
+        QUANTUM_FIELD,
+        NEW_COUNT_FIELD,
+        NEW_PROCESS_PID_FIELD,
+        NEW_PROCESS_SIZE_FIELD,
+        SUSPENDED_COUNT_FIELD,
+        SUSPENDED_PROCESS_PID_FIELD,
+        SUSPENDED_PROCESS_SIZE_FIELD,
         NUM_OF_FIELDS
     };
 
-    static const int FIELD_WIDTH = 5;
+    static const int FIELD_WIDTH = 4;
 
     static const string labels[NUM_OF_FIELDS];
 

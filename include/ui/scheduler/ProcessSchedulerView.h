@@ -56,6 +56,7 @@ private:
     void initPanels();
     void unpostPanels();
     void updateSummary();
+    Process *nextProcess(ProcessList &processes);
     void updatePanels();
 };
 
