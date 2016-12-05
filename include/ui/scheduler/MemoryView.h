@@ -26,7 +26,8 @@ public:
     static const int FRAME_WIDTH = (MemoryManager::FRAME_SIZE
                                     * (BLOCK_SIZE + BLOCK_SPACING));
     static const int FRAME_NUM_WIDTH = 3;
-    static const int FRAME_SPACING = 1;
+    static const int FRAME_SPACING = 2;
+    static const int COLUMN_WIDTH = FRAME_NUM_WIDTH + FRAME_WIDTH;
 
     static void init();
 

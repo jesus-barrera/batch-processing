@@ -78,8 +78,8 @@ void MemoryView::initFields() {
         fields[MemoryManager::TOTAL_FRAMES + i] = newFrameNumField(row, col, i);
         fields[i] = newFrameField(row, col + FRAME_NUM_WIDTH);
 
-        if ((row += 1 + FRAME_SPACING) >= max_y) {
-            col += FRAME_NUM_WIDTH + FRAME_WIDTH;
+        if ((row += FRAME_SPACING) >= max_y) {
+            col += COLUMN_WIDTH; // move to next column
             row = 0;
         }
     }
