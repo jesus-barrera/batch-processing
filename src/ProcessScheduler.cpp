@@ -5,12 +5,12 @@
 #include "ui/screen.h"
 
 const string ProcessScheduler::HELP =
-    "e:interrupcion | " \
-    "w:error | " \
-    "p:pausa | " \
-    "u:crear proceso | " \
-    "b:BCPs | " \
-    "t:paginas";
+    "e: interrupcion | " \
+    "w: error | " \
+    "p: pausa | " \
+    "u: crear proceso | " \
+    "b: ver BCPs | " \
+    "t: ver paginas";
 
 ProcessScheduler::ProcessScheduler() {
     num_of_processes = 0;
